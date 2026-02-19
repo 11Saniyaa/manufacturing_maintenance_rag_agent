@@ -30,10 +30,6 @@ AI-powered maintenance assistant for manufacturing equipment using LangChain and
    npm start
    ```
 
-4. **Access Application**
-   - Frontend: http://localhost:4200
-   - Backend API: http://localhost:3000
-
 ## 🛠️ Tech Stack
 
 - **Frontend**: Angular 16
