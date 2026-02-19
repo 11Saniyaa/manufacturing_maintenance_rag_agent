@@ -1,0 +1,107 @@
+[
+  {
+    "issue": "Motor overheating",
+    "category": "Motor",
+    "causes": [
+      "Excessive load on motor",
+      "Blocked ventilation",
+      "Dirty cooling fins",
+      "Faulty cooling fan",
+      "High ambient temperature"
+    ],
+    "steps": [
+      "Immediately reduce motor load or shut down if critical",
+      "Check cooling fan operation - ensure it's running",
+      "Clean ventilation openings and cooling fins",
+      "Inspect for blocked air vents",
+      "Verify ambient temperature is within specifications",
+      "Check motor bearings for excessive friction",
+      "Allow motor to cool before restarting"
+    ],
+    "prevention": [
+      "Regular cleaning of cooling components",
+      "Monitor motor load during operation",
+      "Ensure adequate ventilation around motor",
+      "Follow recommended maintenance schedule"
+    ]
+  },
+  {
+    "issue": "Excessive vibration",
+    "category": "General",
+    "causes": [
+      "Misalignment of components",
+      "Worn bearings",
+      "Unbalanced rotating parts",
+      "Loose mounting bolts",
+      "Foundation issues"
+    ],
+    "steps": [
+      "Stop machine immediately if vibration is severe",
+      "Check for loose mounting bolts and tighten",
+      "Inspect bearings for wear or damage",
+      "Verify component alignment",
+      "Check for unbalanced rotating parts",
+      "Inspect foundation and mounting surfaces",
+      "Use vibration analysis tools if available"
+    ],
+    "prevention": [
+      "Regular alignment checks",
+      "Scheduled bearing replacement",
+      "Proper installation procedures",
+      "Regular inspection of mounting hardware"
+    ]
+  },
+  {
+    "issue": "Low air pressure",
+    "category": "Air Compressor",
+    "causes": [
+      "Dirty air filter",
+      "Air leaks in system",
+      "Low compressor oil",
+      "Faulty pressure regulator",
+      "Blocked air lines"
+    ],
+    "steps": [
+      "Check air filter - clean or replace if dirty",
+      "Inspect entire system for air leaks",
+      "Verify compressor oil level",
+      "Check pressure regulator settings",
+      "Inspect air lines for blockages",
+      "Check compressor intake for restrictions",
+      "Verify compressor is running at full capacity"
+    ],
+    "prevention": [
+      "Regular filter replacement",
+      "Periodic leak detection",
+      "Scheduled oil changes",
+      "Regular system inspections"
+    ]
+  },
+  {
+    "issue": "Belt misalignment",
+    "category": "Conveyor",
+    "causes": [
+      "Improper belt tension",
+      "Worn pulleys",
+      "Material buildup",
+      "Frame misalignment",
+      "Damaged belt"
+    ],
+    "steps": [
+      "Stop conveyor and inspect belt alignment",
+      "Check belt tension - adjust if necessary",
+      "Inspect pulleys for wear or damage",
+      "Clean material buildup from pulleys",
+      "Verify frame alignment",
+      "Check belt condition for damage",
+      "Adjust tracking mechanism if available"
+    ],
+    "prevention": [
+      "Regular belt inspection",
+      "Proper installation procedures",
+      "Regular cleaning of pulleys",
+      "Scheduled pulley replacement"
+    ]
+  }
+]
+

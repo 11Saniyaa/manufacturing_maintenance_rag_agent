@@ -1,0 +1,73 @@
+[
+  {
+    "code": "E45",
+    "meaning": "Overheating",
+    "description": "Machine temperature exceeds safe operating limits. This can cause damage to components and pose safety risks.",
+    "troubleshootingSteps": [
+      "Check cooling fan operation - ensure it's running and not blocked",
+      "Inspect ventilation system - clear any obstructions",
+      "Reduce machine load - allow cooling time",
+      "Clean air filters - replace if necessary",
+      "Check for blocked vents - ensure proper airflow",
+      "Verify ambient temperature is within operating range"
+    ],
+    "machineType": "Conveyor"
+  },
+  {
+    "code": "E12",
+    "meaning": "Motor Overload",
+    "description": "Motor is drawing excessive current, indicating it's working beyond its rated capacity.",
+    "troubleshootingSteps": [
+      "Check motor load - reduce if excessive",
+      "Inspect for mechanical binding - check for obstructions",
+      "Verify power supply voltage - ensure it matches motor requirements",
+      "Check motor bearings - replace if worn",
+      "Reduce operational load - allow motor to cool",
+      "Inspect motor windings for damage"
+    ],
+    "machineType": "Motor"
+  },
+  {
+    "code": "M101",
+    "meaning": "Spindle Error",
+    "description": "CNC spindle malfunction detected. The spindle may not be rotating correctly or has lost position.",
+    "troubleshootingSteps": [
+      "Check spindle motor connections - ensure all connections are secure",
+      "Inspect spindle bearings - replace if worn or damaged",
+      "Verify spindle speed settings - check program parameters",
+      "Check for tool holder issues - ensure proper installation",
+      "Review CNC program parameters - verify spindle commands",
+      "Check spindle encoder for faults"
+    ],
+    "machineType": "CNC"
+  },
+  {
+    "code": "C88",
+    "meaning": "Low Air Pressure",
+    "description": "Compressed air pressure below required threshold. System cannot maintain adequate pressure.",
+    "troubleshootingSteps": [
+      "Check air filter condition - replace if dirty",
+      "Inspect for air leaks - check all connections",
+      "Verify compressor oil level - top up if needed",
+      "Check pressure regulator settings - adjust if necessary",
+      "Inspect air lines for blockages - clear any obstructions",
+      "Check compressor intake - ensure adequate airflow"
+    ],
+    "machineType": "Air Compressor"
+  },
+  {
+    "code": "E23",
+    "meaning": "Belt Slippage",
+    "description": "Conveyor belt is slipping on drive pulley, causing reduced efficiency and potential damage.",
+    "troubleshootingSteps": [
+      "Check belt tension - adjust if too loose",
+      "Inspect belt condition - replace if worn",
+      "Verify pulley alignment - correct if misaligned",
+      "Check for material buildup - clean pulleys",
+      "Inspect drive motor - ensure proper operation",
+      "Check belt tracking - adjust if necessary"
+    ],
+    "machineType": "Conveyor"
+  }
+]
+

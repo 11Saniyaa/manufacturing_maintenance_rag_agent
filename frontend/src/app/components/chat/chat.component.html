@@ -1,0 +1,46 @@
+<div class="chat-wrapper">
+  <div class="chat-messages" #chatMessages>
+    <div
+      *ngFor="let message of messages"
+      [class]="'message ' + message.sender"
+    >
+      <div class="message-content">
+        <div class="message-text">{{ message.text }}</div>
+        <div class="message-time">
+          {{ message.timestamp | date: 'short' }}
+        </div>
+      </div>
+    </div>
+    <div *ngIf="isLoading" class="message assistant">
+      <div class="message-content">
+        <div class="message-text">
+          <span class="typing-indicator">Thinking...</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="chat-input-container">
+    <div class="machine-indicator" *ngIf="selectedMachineId">
+      <span>💻 Machine Selected</span>
+    </div>
+    <div class="input-wrapper">
+      <textarea
+        [(ngModel)]="userInput"
+        (keydown)="onKeyPress($event)"
+        placeholder="Describe your machine problem or ask a question..."
+        class="chat-input"
+        rows="2"
+        [disabled]="isLoading"
+      ></textarea>
+      <button
+        (click)="sendMessage()"
+        [disabled]="!userInput.trim() || isLoading"
+        class="send-button"
+      >
+        Send
+      </button>
+    </div>
+  </div>
+</div>
+

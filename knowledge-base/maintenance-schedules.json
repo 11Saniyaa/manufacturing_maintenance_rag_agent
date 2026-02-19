@@ -1,0 +1,91 @@
+[
+  {
+    "task": "Daily Inspection",
+    "frequency": "Daily",
+    "description": "Basic visual and operational checks",
+    "steps": [
+      "Check for unusual sounds or vibrations",
+      "Inspect for visible damage or leaks",
+      "Verify safety systems are operational",
+      "Check fluid levels (oil, coolant, etc.)",
+      "Document any issues found"
+    ],
+    "applicableMachines": ["All"]
+  },
+  {
+    "task": "Oil Change",
+    "frequency": "Every 1000 operating hours",
+    "description": "Replace hydraulic oil and filter to maintain system performance",
+    "steps": [
+      "Shut down machine safely and allow to cool",
+      "Drain old oil completely",
+      "Replace oil filter with new one",
+      "Fill with recommended oil type and grade",
+      "Check oil level and top up if needed",
+      "Test operation and check for leaks",
+      "Document oil change in maintenance log"
+    ],
+    "applicableMachines": ["Motor", "CNC", "Air Compressor"]
+  },
+  {
+    "task": "Belt Inspection and Adjustment",
+    "frequency": "Monthly",
+    "description": "Inspect conveyor belt condition and adjust tension",
+    "steps": [
+      "Inspect belt for wear, cracks, or damage",
+      "Check belt tension using tension gauge",
+      "Adjust tension if necessary",
+      "Clean belt surface and pulleys",
+      "Check belt tracking and adjust if needed",
+      "Lubricate bearings as required",
+      "Document inspection findings"
+    ],
+    "applicableMachines": ["Conveyor"]
+  },
+  {
+    "task": "Spindle Maintenance",
+    "frequency": "Every 500 hours",
+    "description": "Clean and lubricate CNC spindle for optimal performance",
+    "steps": [
+      "Power down machine completely",
+      "Remove tool holder from spindle",
+      "Clean spindle taper with appropriate cleaner",
+      "Apply recommended spindle lubricant",
+      "Reinstall tool holder securely",
+      "Run test program to verify operation",
+      "Check spindle runout if possible"
+    ],
+    "applicableMachines": ["CNC"]
+  },
+  {
+    "task": "Air Filter Replacement",
+    "frequency": "Quarterly",
+    "description": "Replace compressor air filter to maintain efficiency",
+    "steps": [
+      "Shut off compressor and release pressure",
+      "Remove old filter carefully",
+      "Clean filter housing thoroughly",
+      "Install new filter ensuring proper seal",
+      "Check filter installation for leaks",
+      "Restart compressor and verify pressure",
+      "Monitor for proper operation"
+    ],
+    "applicableMachines": ["Air Compressor"]
+  },
+  {
+    "task": "Comprehensive Inspection",
+    "frequency": "Quarterly",
+    "description": "Detailed inspection of all machine components",
+    "steps": [
+      "Complete visual inspection of all components",
+      "Check electrical connections and wiring",
+      "Inspect mechanical components for wear",
+      "Test all safety systems",
+      "Verify calibration of sensors and controls",
+      "Review maintenance history",
+      "Document all findings and schedule repairs"
+    ],
+    "applicableMachines": ["All"]
+  }
+]
+

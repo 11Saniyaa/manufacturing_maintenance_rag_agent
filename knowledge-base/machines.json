@@ -1,0 +1,55 @@
+[
+  {
+    "name": "Conveyor Belt System A",
+    "type": "Conveyor",
+    "description": "Main production line conveyor belt system for material transport",
+    "manufacturer": "Industrial Conveyors Inc.",
+    "model": "IC-5000",
+    "commonIssues": [
+      "Belt slippage",
+      "Motor overheating",
+      "Belt misalignment",
+      "Excessive noise"
+    ]
+  },
+  {
+    "name": "Industrial Motor Unit 1",
+    "type": "Motor",
+    "description": "High-power industrial motor for heavy machinery operations",
+    "manufacturer": "Power Motors Ltd.",
+    "model": "PM-3000",
+    "commonIssues": [
+      "Overheating",
+      "Excessive vibration",
+      "Bearing failure",
+      "Electrical faults"
+    ]
+  },
+  {
+    "name": "CNC Milling Machine",
+    "type": "CNC",
+    "description": "Computer numerical control milling machine for precision manufacturing",
+    "manufacturer": "Precision CNC Systems",
+    "model": "PCNC-2000",
+    "commonIssues": [
+      "Spindle errors",
+      "Tool holder issues",
+      "Axis misalignment",
+      "Coolant system problems"
+    ]
+  },
+  {
+    "name": "Air Compressor Station",
+    "type": "Air Compressor",
+    "description": "Industrial air compressor for pneumatic systems and tools",
+    "manufacturer": "AirTech Industries",
+    "model": "AT-1500",
+    "commonIssues": [
+      "Low air pressure",
+      "Oil leaks",
+      "Excessive noise",
+      "Overheating"
+    ]
+  }
+]
+

@@ -1,0 +1,67 @@
+<div class="error-code-search">
+  <h3>🔍 Error Code Lookup</h3>
+  <div class="search-wrapper">
+    <input
+      type="text"
+      [(ngModel)]="searchTerm"
+      (input)="search()"
+      placeholder="Search by code (e.g., E45) or keyword..."
+      class="search-input"
+    />
+    <button
+      *ngIf="searchTerm"
+      (click)="clearSearch()"
+      class="clear-button"
+      title="Clear search"
+    >
+      ✕
+    </button>
+  </div>
+
+  <div *ngIf="isSearching" class="loading">Searching...</div>
+
+  <div *ngIf="!isSearching && searchResults.length > 0" class="results">
+    <div class="results-header">
+      Found {{ searchResults.length }} result(s)
+    </div>
+    <div class="result-list">
+      <div
+        *ngFor="let errorCode of searchResults"
+        (click)="selectErrorCode(errorCode)"
+        [class.active]="selectedErrorCode?.id === errorCode.id"
+        class="result-item"
+      >
+        <div class="error-code-header">
+          <span class="code">{{ errorCode.code }}</span>
+          <span class="meaning">{{ errorCode.meaning }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="!isSearching && searchTerm && searchResults.length === 0" class="no-results">
+    No error codes found matching "{{ searchTerm }}"
+  </div>
+
+  <div *ngIf="selectedErrorCode" class="error-details">
+    <h4>Error Details</h4>
+    <div class="detail-section">
+      <strong>Code:</strong> {{ selectedErrorCode.code }}
+    </div>
+    <div class="detail-section">
+      <strong>Meaning:</strong> {{ selectedErrorCode.meaning }}
+    </div>
+    <div class="detail-section">
+      <strong>Description:</strong>
+      <p>{{ selectedErrorCode.description }}</p>
+    </div>
+    <div class="detail-section">
+      <strong>Troubleshooting Steps:</strong>
+      <div class="steps">{{ selectedErrorCode.troubleshootingSteps }}</div>
+    </div>
+    <div *ngIf="selectedErrorCode.machine" class="detail-section">
+      <strong>Machine:</strong> {{ selectedErrorCode.machine.name }}
+    </div>
+  </div>
+</div>
+

@@ -1,0 +1,22 @@
+<div class="app-container">
+  <header class="app-header">
+    <h1>🔧 Manufacturing Equipment Maintenance Query Agent</h1>
+    <p class="subtitle">AI-Powered Maintenance Assistance for Factory Workers</p>
+  </header>
+
+  <main class="main-content">
+    <div class="sidebar">
+      <app-machine-selector (machineSelected)="onMachineSelected($event)"></app-machine-selector>
+      <app-error-code-search></app-error-code-search>
+    </div>
+
+    <div class="chat-container">
+      <app-chat [selectedMachineId]="selectedMachineId"></app-chat>
+    </div>
+  </main>
+
+  <footer class="app-footer">
+    <p>Offline AI Assistant • Powered by Ollama & LangChain</p>
+  </footer>
+</div>
+
