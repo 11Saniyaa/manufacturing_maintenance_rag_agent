@@ -1,11 +1,14 @@
 <div class="error-code-search">
-  <h3>🔍 Error Code Lookup</h3>
+  <h3>
+    <span class="section-icon">🔍</span>
+    Error Code Lookup
+  </h3>
   <div class="search-wrapper">
     <input
       type="text"
       [(ngModel)]="searchTerm"
       (input)="search()"
-      placeholder="Search by code (e.g., E45) or keyword..."
+      placeholder="🔎 Search by code (e.g., E45) or keyword..."
       class="search-input"
     />
     <button

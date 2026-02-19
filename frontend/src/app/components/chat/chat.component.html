@@ -14,7 +14,10 @@
     <div *ngIf="isLoading" class="message assistant">
       <div class="message-content">
         <div class="message-text">
-          <span class="typing-indicator">Thinking...</span>
+          <span class="loading-content">
+            <span class="loading-dots"></span>
+            <span class="loading-text">Analyzing your query...</span>
+          </span>
         </div>
       </div>
     </div>
@@ -22,13 +25,14 @@
 
   <div class="chat-input-container">
     <div class="machine-indicator" *ngIf="selectedMachineId">
-      <span>💻 Machine Selected</span>
+      <span class="indicator-icon">💻</span>
+      <span>Machine Selected - Context-Aware Mode</span>
     </div>
     <div class="input-wrapper">
       <textarea
         [(ngModel)]="userInput"
         (keydown)="onKeyPress($event)"
-        placeholder="Describe your machine problem or ask a question..."
+        placeholder="Describe your machine problem or ask a question... (Press Enter to send)"
         class="chat-input"
         rows="2"
         [disabled]="isLoading"

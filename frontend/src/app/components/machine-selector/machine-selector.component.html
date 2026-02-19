@@ -1,5 +1,8 @@
 <div class="machine-selector">
-  <h3>🏭 Select Machine</h3>
+  <h3>
+    <span class="section-icon">🏭</span>
+    Select Machine
+  </h3>
   <div class="selector-wrapper">
     <select
       id="machine-select"
@@ -7,7 +10,7 @@
       (change)="onMachineChange($event)"
       class="machine-select"
     >
-      <option [value]="null">All Machines</option>
+      <option [value]="null">🌐 All Machines</option>
       <option *ngFor="let machine of machines" [value]="machine.id">
         {{ machine.name }} ({{ machine.type }})
       </option>
