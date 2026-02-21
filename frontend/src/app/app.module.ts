@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
+import { FormsModule } from '@angular/forms';
 
 import { AppComponent } from './app.component';
 import { ChatComponent } from './components/chat/chat.component';
@@ -13,15 +13,15 @@ import { ErrorCodeSearchComponent } from './components/error-code-search/error-c
     AppComponent,
     ChatComponent,
     MachineSelectorComponent,
-    ErrorCodeSearchComponent,
+    ErrorCodeSearchComponent
   ],
   imports: [
     BrowserModule,
-    FormsModule,
     HttpClientModule,
+    FormsModule
   ],
   providers: [],
-  bootstrap: [AppComponent],
+  bootstrap: [AppComponent]
 })
-export class AppModule {}
+export class AppModule { }
 

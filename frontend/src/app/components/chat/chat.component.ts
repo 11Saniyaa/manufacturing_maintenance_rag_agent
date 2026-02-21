@@ -1,73 +1,114 @@
-import { Component, Input, OnInit } from '@angular/core';
-import { ApiService } from '../../services/api.service';
+import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { ChatService } from '../../services/chat.service';
+import { MachineService, Machine } from '../../services/machine.service';
 
-interface Message {
+export interface Message {
   text: string;
-  sender: 'user' | 'assistant';
+  isUser: boolean;
   timestamp: Date;
 }
 
 @Component({
   selector: 'app-chat',
   templateUrl: './chat.component.html',
-  styleUrls: ['./chat.component.css'],
+  styleUrls: ['./chat.component.css']
 })
-export class ChatComponent implements OnInit {
-  @Input() selectedMachineId: number | null = null;
+export class ChatComponent implements OnChanges {
+  @Input() selectedMachineId?: number;
 
   messages: Message[] = [];
-  userInput: string = '';
+  currentQuery: string = '';
   isLoading: boolean = false;
+  selectedMachine?: Machine;
 
-  constructor(private apiService: ApiService) {}
-
-  ngOnInit() {
+  constructor(
+    private chatService: ChatService,
+    private machineService: MachineService
+  ) {
     // Add welcome message
     this.messages.push({
-      text: 'Hello! I\'m your maintenance assistant. Describe your machine problem or ask a question, and I\'ll help you troubleshoot it.',
-      sender: 'assistant',
-      timestamp: new Date(),
+      text: 'Hello! I\'m your maintenance assistant. How can I help you today?',
+      isUser: false,
+      timestamp: new Date()
+    });
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['selectedMachineId']) {
+      const previousId = changes['selectedMachineId'].previousValue;
+      const currentId = changes['selectedMachineId'].currentValue;
+      
+      if (currentId && currentId !== previousId) {
+        this.loadMachineInfo(currentId);
+      } else if (!currentId && previousId) {
+        this.selectedMachine = undefined;
+        // Add a message when machine selection is cleared
+        this.messages.push({
+          text: 'Machine selection cleared. I can now assist with all machines.',
+          isUser: false,
+          timestamp: new Date()
+        });
+      }
+    }
+  }
+
+  loadMachineInfo(machineId: number) {
+    this.machineService.getMachine(machineId).subscribe({
+      next: (machine) => {
+        this.selectedMachine = machine;
+        // Add a system message indicating machine context
+        this.messages.push({
+          text: `Now assisting with: ${machine.name} (${machine.type})`,
+          isUser: false,
+          timestamp: new Date()
+        });
+      },
+      error: (error) => {
+        console.error('Error loading machine info:', error);
+        this.selectedMachine = undefined;
+      }
     });
   }
 
   sendMessage() {
-    if (!this.userInput.trim() || this.isLoading) {
+    if (!this.currentQuery.trim() || this.isLoading) {
       return;
     }
 
     const userMessage: Message = {
-      text: this.userInput,
-      sender: 'user',
-      timestamp: new Date(),
+      text: this.currentQuery,
+      isUser: true,
+      timestamp: new Date()
     };
-
     this.messages.push(userMessage);
-    const query = this.userInput;
-    this.userInput = '';
+
+    const query = this.currentQuery;
+    this.currentQuery = '';
     this.isLoading = true;
 
-    // Send query to backend
-    this.apiService.sendQuery(query, this.selectedMachineId || undefined).subscribe({
+    // Debug log to verify machine ID is being sent
+    console.log('Sending query with machine ID:', this.selectedMachineId);
+
+    this.chatService.sendQuery(query, this.selectedMachineId).subscribe({
       next: (response) => {
-        const assistantMessage: Message = {
+        const botMessage: Message = {
           text: response.response,
-          sender: 'assistant',
-          timestamp: new Date(response.timestamp),
+          isUser: false,
+          timestamp: new Date(response.timestamp)
         };
-        this.messages.push(assistantMessage);
+        this.messages.push(botMessage);
         this.isLoading = false;
-        this.scrollToBottom();
       },
       error: (error) => {
         console.error('Error sending query:', error);
         const errorMessage: Message = {
-          text: 'Sorry, I encountered an error processing your query. Please make sure the backend server is running and Ollama is configured correctly.',
-          sender: 'assistant',
-          timestamp: new Date(),
+          text: 'Sorry, I encountered an error. Please make sure the backend server is running and LM Studio is active.',
+          isUser: false,
+          timestamp: new Date()
         };
         this.messages.push(errorMessage);
         this.isLoading = false;
-      },
+      }
     });
   }
 
@@ -76,15 +117,6 @@ export class ChatComponent implements OnInit {
       event.preventDefault();
       this.sendMessage();
     }
-  }
-
-  private scrollToBottom() {
-    setTimeout(() => {
-      const chatMessages = document.querySelector('.chat-messages');
-      if (chatMessages) {
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-      }
-    }, 100);
   }
 }
 

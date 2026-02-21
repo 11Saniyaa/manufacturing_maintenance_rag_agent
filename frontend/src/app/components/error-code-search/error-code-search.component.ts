@@ -1,68 +1,50 @@
-import { Component, OnInit } from '@angular/core';
-import { ApiService, ErrorCode } from '../../services/api.service';
+import { Component } from '@angular/core';
+import { ErrorCodeService, ErrorCode } from '../../services/error-code.service';
 
 @Component({
   selector: 'app-error-code-search',
   templateUrl: './error-code-search.component.html',
-  styleUrls: ['./error-code-search.component.css'],
+  styleUrls: ['./error-code-search.component.css']
 })
-export class ErrorCodeSearchComponent implements OnInit {
-  searchTerm: string = '';
+export class ErrorCodeSearchComponent {
+  searchKeyword: string = '';
   errorCodes: ErrorCode[] = [];
-  searchResults: ErrorCode[] = [];
-  isSearching: boolean = false;
-  selectedErrorCode: ErrorCode | null = null;
+  isLoading: boolean = false;
+  hasSearched: boolean = false;
 
-  constructor(private apiService: ApiService) {}
-
-  ngOnInit() {
-    this.loadAllErrorCodes();
-  }
-
-  loadAllErrorCodes() {
-    this.apiService.getErrorCodes().subscribe({
-      next: (errorCodes) => {
-        this.errorCodes = errorCodes;
-      },
-      error: (error) => {
-        console.error('Error loading error codes:', error);
-      },
-    });
-  }
+  constructor(private errorCodeService: ErrorCodeService) { }
 
   search() {
-    if (!this.searchTerm.trim()) {
-      this.searchResults = [];
-      this.selectedErrorCode = null;
+    if (!this.searchKeyword.trim()) {
       return;
     }
 
-    this.isSearching = true;
-    this.apiService.searchErrorCodes(this.searchTerm).subscribe({
-      next: (results) => {
-        this.searchResults = results;
-        this.isSearching = false;
-        if (results.length > 0) {
-          this.selectedErrorCode = results[0];
-        } else {
-          this.selectedErrorCode = null;
-        }
+    this.isLoading = true;
+    this.hasSearched = true;
+    this.errorCodeService.searchErrorCodes(this.searchKeyword).subscribe({
+      next: (codes) => {
+        this.errorCodes = codes;
+        this.isLoading = false;
       },
       error: (error) => {
         console.error('Error searching error codes:', error);
-        this.isSearching = false;
-      },
+        this.errorCodes = [];
+        this.isLoading = false;
+      }
     });
   }
 
-  selectErrorCode(errorCode: ErrorCode) {
-    this.selectedErrorCode = errorCode;
+  onKeyPress(event: KeyboardEvent) {
+    if (event.key === 'Enter') {
+      this.search();
+    }
   }
 
   clearSearch() {
-    this.searchTerm = '';
-    this.searchResults = [];
-    this.selectedErrorCode = null;
+    this.searchKeyword = '';
+    this.errorCodes = [];
+    this.hasSearched = false;
   }
 }
+
 

@@ -57,6 +57,7 @@ let ChatService = class ChatService {
     }
     async processQuery(query, machineId) {
         try {
+            console.log(`Processing query with machineId: ${machineId}, query: ${query}`);
             const context = await this.buildContext(query, machineId);
             const systemPrompt = this.buildSystemPrompt(context);
             const llmProvider = process.env.LLM_PROVIDER || 'lmstudio';

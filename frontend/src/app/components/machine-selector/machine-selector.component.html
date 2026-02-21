@@ -1,38 +1,28 @@
 <div class="machine-selector">
-  <h3>
-    <span class="section-icon">🏭</span>
-    Select Machine
-  </h3>
-  <div class="selector-wrapper">
-    <select
-      id="machine-select"
-      [(ngModel)]="selectedMachineId"
-      (change)="onMachineChange($event)"
+  <label for="machine-select">Select Machine (Optional):</label>
+  <div class="selector-container">
+    <select 
+      id="machine-select" 
+      [(ngModel)]="selectedMachineId" 
+      (change)="onMachineChange()"
       class="machine-select"
+      [disabled]="isLoading"
     >
-      <option [value]="null">🌐 All Machines</option>
+      <option [value]="undefined">All Machines</option>
       <option *ngFor="let machine of machines" [value]="machine.id">
         {{ machine.name }} ({{ machine.type }})
       </option>
     </select>
-    <button
-      *ngIf="selectedMachineId"
-      (click)="clearSelection()"
+    <button 
+      *ngIf="selectedMachineId" 
+      (click)="clearSelection()" 
       class="clear-button"
       title="Clear selection"
     >
-      ✕
+      ×
     </button>
   </div>
-  <div *ngIf="selectedMachineId" class="machine-info">
-    <div *ngFor="let machine of machines">
-      <div *ngIf="machine.id === selectedMachineId" class="info-content">
-        <p><strong>Type:</strong> {{ machine.type }}</p>
-        <p *ngIf="machine.description"><strong>Description:</strong> {{ machine.description }}</p>
-        <p *ngIf="machine.manufacturer"><strong>Manufacturer:</strong> {{ machine.manufacturer }}</p>
-        <p *ngIf="machine.model"><strong>Model:</strong> {{ machine.model }}</p>
-      </div>
-    </div>
-  </div>
+  <div *ngIf="isLoading" class="loading">Loading machines...</div>
 </div>
+
 

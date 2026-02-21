@@ -1,70 +1,40 @@
 <div class="error-code-search">
-  <h3>
-    <span class="section-icon">🔍</span>
-    Error Code Lookup
-  </h3>
-  <div class="search-wrapper">
-    <input
-      type="text"
-      [(ngModel)]="searchTerm"
-      (input)="search()"
-      placeholder="🔎 Search by code (e.g., E45) or keyword..."
+  <h3>Error Code Search</h3>
+  <div class="search-container">
+    <input 
+      type="text" 
+      [(ngModel)]="searchKeyword" 
+      (keypress)="onKeyPress($event)"
+      placeholder="Search error codes..."
       class="search-input"
     />
-    <button
-      *ngIf="searchTerm"
-      (click)="clearSearch()"
-      class="clear-button"
-      title="Clear search"
-    >
-      ✕
+    <button (click)="search()" class="search-button" [disabled]="!searchKeyword.trim() || isLoading">
+      Search
+    </button>
+    <button *ngIf="hasSearched" (click)="clearSearch()" class="clear-button">
+      Clear
     </button>
   </div>
 
-  <div *ngIf="isSearching" class="loading">Searching...</div>
+  <div *ngIf="isLoading" class="loading">Searching...</div>
 
-  <div *ngIf="!isSearching && searchResults.length > 0" class="results">
-    <div class="results-header">
-      Found {{ searchResults.length }} result(s)
-    </div>
-    <div class="result-list">
-      <div
-        *ngFor="let errorCode of searchResults"
-        (click)="selectErrorCode(errorCode)"
-        [class.active]="selectedErrorCode?.id === errorCode.id"
-        class="result-item"
-      >
-        <div class="error-code-header">
-          <span class="code">{{ errorCode.code }}</span>
-          <span class="meaning">{{ errorCode.meaning }}</span>
-        </div>
+  <div *ngIf="!isLoading && hasSearched && errorCodes.length === 0" class="no-results">
+    No error codes found for "{{ searchKeyword }}"
+  </div>
+
+  <div *ngIf="!isLoading && errorCodes.length > 0" class="results">
+    <div *ngFor="let code of errorCodes" class="error-code-card">
+      <div class="code-header">
+        <span class="code-value">{{ code.code }}</span>
+        <span class="code-meaning">{{ code.meaning }}</span>
+      </div>
+      <div class="code-description">{{ code.description }}</div>
+      <div class="code-troubleshooting">
+        <strong>Troubleshooting:</strong>
+        <div>{{ code.troubleshootingSteps }}</div>
       </div>
     </div>
   </div>
-
-  <div *ngIf="!isSearching && searchTerm && searchResults.length === 0" class="no-results">
-    No error codes found matching "{{ searchTerm }}"
-  </div>
-
-  <div *ngIf="selectedErrorCode" class="error-details">
-    <h4>Error Details</h4>
-    <div class="detail-section">
-      <strong>Code:</strong> {{ selectedErrorCode.code }}
-    </div>
-    <div class="detail-section">
-      <strong>Meaning:</strong> {{ selectedErrorCode.meaning }}
-    </div>
-    <div class="detail-section">
-      <strong>Description:</strong>
-      <p>{{ selectedErrorCode.description }}</p>
-    </div>
-    <div class="detail-section">
-      <strong>Troubleshooting Steps:</strong>
-      <div class="steps">{{ selectedErrorCode.troubleshootingSteps }}</div>
-    </div>
-    <div *ngIf="selectedErrorCode.machine" class="detail-section">
-      <strong>Machine:</strong> {{ selectedErrorCode.machine.name }}
-    </div>
-  </div>
 </div>
+
 

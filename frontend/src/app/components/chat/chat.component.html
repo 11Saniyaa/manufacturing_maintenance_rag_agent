@@ -1,50 +1,42 @@
-<div class="chat-wrapper">
-  <div class="chat-messages" #chatMessages>
-    <div
-      *ngFor="let message of messages"
-      [class]="'message ' + message.sender"
-    >
+<div class="chat-container">
+  <div class="chat-header" *ngIf="selectedMachine">
+    <span class="machine-badge">Assisting: {{ selectedMachine.name }} ({{ selectedMachine.type }})</span>
+  </div>
+  <div class="chat-messages" #messagesContainer>
+    <div *ngFor="let message of messages" class="message" [class.user-message]="message.isUser" [class.bot-message]="!message.isUser">
       <div class="message-content">
         <div class="message-text">{{ message.text }}</div>
-        <div class="message-time">
-          {{ message.timestamp | date: 'short' }}
-        </div>
+        <div class="message-time">{{ message.timestamp | date:'short' }}</div>
       </div>
     </div>
-    <div *ngIf="isLoading" class="message assistant">
+    <div *ngIf="isLoading" class="message bot-message">
       <div class="message-content">
         <div class="message-text">
-          <span class="loading-content">
-            <span class="loading-dots"></span>
-            <span class="loading-text">Analyzing your query...</span>
+          <span class="typing-indicator">
+            <span></span><span></span><span></span>
           </span>
+          Thinking...
         </div>
       </div>
     </div>
   </div>
-
   <div class="chat-input-container">
-    <div class="machine-indicator" *ngIf="selectedMachineId">
-      <span class="indicator-icon">💻</span>
-      <span>Machine Selected - Context-Aware Mode</span>
-    </div>
-    <div class="input-wrapper">
-      <textarea
-        [(ngModel)]="userInput"
-        (keydown)="onKeyPress($event)"
-        placeholder="Describe your machine problem or ask a question... (Press Enter to send)"
-        class="chat-input"
-        rows="2"
-        [disabled]="isLoading"
-      ></textarea>
-      <button
-        (click)="sendMessage()"
-        [disabled]="!userInput.trim() || isLoading"
-        class="send-button"
-      >
-        Send
-      </button>
-    </div>
+    <input 
+      type="text" 
+      [(ngModel)]="currentQuery" 
+      (keypress)="onKeyPress($event)"
+      placeholder="Ask about maintenance issues, error codes, or troubleshooting..."
+      class="chat-input"
+      [disabled]="isLoading"
+    />
+    <button 
+      (click)="sendMessage()" 
+      class="send-button"
+      [disabled]="!currentQuery.trim() || isLoading"
+    >
+      Send
+    </button>
   </div>
 </div>
+
 

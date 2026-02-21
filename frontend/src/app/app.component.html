@@ -1,32 +1,20 @@
 <div class="app-container">
-  <header class="app-header">
-    <div class="header-content">
-      <div class="header-icon">⚙️</div>
-      <div>
-        <h1>Manufacturing Equipment Maintenance</h1>
-        <p class="subtitle">AI-Powered Maintenance Assistance for Factory Workers</p>
+  <header>
+    <h1>{{ title }}</h1>
+    <p class="subtitle">AI-powered maintenance assistant for manufacturing equipment</p>
+  </header>
+  
+  <main>
+    <div class="content-grid">
+      <div class="left-panel">
+        <app-machine-selector (machineSelected)="onMachineSelected($event)"></app-machine-selector>
+        <app-error-code-search></app-error-code-search>
+      </div>
+      
+      <div class="right-panel">
+        <app-chat [selectedMachineId]="selectedMachineId"></app-chat>
       </div>
     </div>
-  </header>
-
-  <main class="main-content">
-    <div class="sidebar">
-      <app-machine-selector (machineSelected)="onMachineSelected($event)"></app-machine-selector>
-      <app-error-code-search></app-error-code-search>
-    </div>
-
-    <div class="chat-container">
-      <app-chat [selectedMachineId]="selectedMachineId"></app-chat>
-    </div>
   </main>
-
-  <footer class="app-footer">
-    <p>
-      <span class="footer-icon">🔒</span>
-      Offline AI Assistant
-      <span class="footer-separator">•</span>
-      Powered by LangChain & RAG
-    </p>
-  </footer>
 </div>
 

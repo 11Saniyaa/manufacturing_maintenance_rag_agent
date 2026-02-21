@@ -1,47 +1,46 @@
 import { Component, OnInit, Output, EventEmitter } from '@angular/core';
-import { ApiService, Machine } from '../../services/api.service';
+import { MachineService, Machine } from '../../services/machine.service';
 
 @Component({
   selector: 'app-machine-selector',
   templateUrl: './machine-selector.component.html',
-  styleUrls: ['./machine-selector.component.css'],
+  styleUrls: ['./machine-selector.component.css']
 })
 export class MachineSelectorComponent implements OnInit {
-  machines: Machine[] = [];
-  selectedMachineId: number | null = null;
-  @Output() machineSelected = new EventEmitter<number | null>();
+  @Output() machineSelected = new EventEmitter<number | undefined>();
 
-  constructor(private apiService: ApiService) {}
+  machines: Machine[] = [];
+  selectedMachineId?: number;
+  isLoading: boolean = false;
+
+  constructor(private machineService: MachineService) { }
 
   ngOnInit() {
     this.loadMachines();
   }
 
   loadMachines() {
-    this.apiService.getMachines().subscribe({
+    this.isLoading = true;
+    this.machineService.getAllMachines().subscribe({
       next: (machines) => {
         this.machines = machines;
+        this.isLoading = false;
       },
       error: (error) => {
         console.error('Error loading machines:', error);
-      },
+        this.isLoading = false;
+      }
     });
   }
 
-  onMachineChange(event: Event) {
-    const selectElement = event.target as HTMLSelectElement;
-    const machineId = selectElement.value ? +selectElement.value : null;
-    this.selectedMachineId = machineId;
-    this.machineSelected.emit(machineId);
+  onMachineChange() {
+    this.machineSelected.emit(this.selectedMachineId);
   }
 
   clearSelection() {
-    this.selectedMachineId = null;
-    const selectElement = document.getElementById('machine-select') as HTMLSelectElement;
-    if (selectElement) {
-      selectElement.value = '';
-    }
-    this.machineSelected.emit(null);
+    this.selectedMachineId = undefined;
+    this.machineSelected.emit(undefined);
   }
 }
+
 

@@ -3,13 +3,13 @@ import { Component } from '@angular/core';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css'],
+  styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  title = 'Manufacturing Equipment Maintenance Query Agent';
-  selectedMachineId: number | null = null;
+  title = 'Manufacturing Maintenance RAG Agent';
+  selectedMachineId?: number;
 
-  onMachineSelected(machineId: number | null) {
+  onMachineSelected(machineId: number | undefined) {
     this.selectedMachineId = machineId;
   }
 }
