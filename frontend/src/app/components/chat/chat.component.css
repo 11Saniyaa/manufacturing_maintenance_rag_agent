@@ -78,8 +78,37 @@
 
 .message-text {
   word-wrap: break-word;
-  line-height: 1.5;
+  line-height: 1.6;
   white-space: pre-wrap;
+}
+
+.message-text p {
+  margin: 0.5em 0;
+}
+
+.message-text .message-heading {
+  font-size: 1.1em;
+  font-weight: 600;
+  margin: 0.8em 0 0.4em 0;
+  color: #1976D2;
+}
+
+.message-text .list-item {
+  margin: 0.3em 0;
+  padding-left: 1em;
+}
+
+.message-text .list-item.numbered {
+  list-style-type: decimal;
+}
+
+.message-text .list-item.bullet {
+  list-style-type: disc;
+}
+
+.message-text strong {
+  font-weight: 600;
+  color: #333;
 }
 
 .message-time {

@@ -1,4 +1,5 @@
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges, ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { ChatService } from '../../services/chat.service';
 import { MachineService, Machine } from '../../services/machine.service';
 
@@ -13,17 +14,20 @@ export interface Message {
   templateUrl: './chat.component.html',
   styleUrls: ['./chat.component.css']
 })
-export class ChatComponent implements OnChanges {
+export class ChatComponent implements OnChanges, AfterViewChecked {
   @Input() selectedMachineId?: number;
+  @ViewChild('messagesContainer') private messagesContainer!: ElementRef;
 
   messages: Message[] = [];
   currentQuery: string = '';
   isLoading: boolean = false;
   selectedMachine?: Machine;
+  private shouldScroll: boolean = false;
 
   constructor(
     private chatService: ChatService,
-    private machineService: MachineService
+    private machineService: MachineService,
+    private sanitizer: DomSanitizer
   ) {
     // Add welcome message
     this.messages.push({
@@ -70,6 +74,24 @@ export class ChatComponent implements OnChanges {
     });
   }
 
+  ngAfterViewChecked() {
+    if (this.shouldScroll) {
+      this.scrollToBottom();
+      this.shouldScroll = false;
+    }
+  }
+
+  private scrollToBottom(): void {
+    try {
+      if (this.messagesContainer) {
+        this.messagesContainer.nativeElement.scrollTop = 
+          this.messagesContainer.nativeElement.scrollHeight;
+      }
+    } catch (err) {
+      console.error('Error scrolling to bottom:', err);
+    }
+  }
+
   sendMessage() {
     if (!this.currentQuery.trim() || this.isLoading) {
       return;
@@ -81,6 +103,7 @@ export class ChatComponent implements OnChanges {
       timestamp: new Date()
     };
     this.messages.push(userMessage);
+    this.shouldScroll = true;
 
     const query = this.currentQuery;
     this.currentQuery = '';
@@ -98,16 +121,18 @@ export class ChatComponent implements OnChanges {
         };
         this.messages.push(botMessage);
         this.isLoading = false;
+        this.shouldScroll = true;
       },
       error: (error) => {
         console.error('Error sending query:', error);
         const errorMessage: Message = {
-          text: 'Sorry, I encountered an error. Please make sure the backend server is running and LM Studio is active.',
+          text: 'Sorry, I encountered an error. Please make sure the backend server is running and your LLM service (LM Studio/Groq) is active.',
           isUser: false,
           timestamp: new Date()
         };
         this.messages.push(errorMessage);
         this.isLoading = false;
+        this.shouldScroll = true;
       }
     });
   }
@@ -117,6 +142,36 @@ export class ChatComponent implements OnChanges {
       event.preventDefault();
       this.sendMessage();
     }
+  }
+
+  formatMessage(text: string): SafeHtml {
+    // Escape HTML first to prevent XSS, then format
+    const escapeHtml = (str: string) => {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    };
+    
+    const escaped = escapeHtml(text);
+    
+    // Format numbered lists and bullet points
+    let formatted = escaped
+      // Convert numbered lists (1. 2. 3.)
+      .replace(/(\d+)\.\s+(.+?)(?=<br>|$)/g, '<div class="list-item numbered">$1. $2</div>')
+      // Convert bullet points (- or •)
+      .replace(/[-•]\s+(.+?)(?=<br>|$)/g, '<div class="list-item bullet">• $1</div>')
+      // Convert bold text (**text**)
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      // Convert headings (=== text ===)
+      .replace(/=== (.+?) ===/g, '<h3 class="message-heading">$1</h3>')
+      // Convert line breaks
+      .replace(/\n\n/g, '</p><p>')
+      .replace(/\n/g, '<br>');
+    
+    // Wrap in paragraph
+    formatted = '<p>' + formatted + '</p>';
+    
+    return this.sanitizer.bypassSecurityTrustHtml(formatted);
   }
 }
 
