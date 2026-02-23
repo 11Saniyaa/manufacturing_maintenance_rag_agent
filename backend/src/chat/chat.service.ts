@@ -3,7 +3,7 @@ import { MachineService } from '../machine/machine.service';
 import { ErrorCodeService } from '../error-code/error-code.service';
 import { MaintenanceService } from '../maintenance/maintenance.service';
 import { QueryLogService } from '../query-log/query-log.service';
-import { SystemMessage, HumanMessage } from '@langchain/core/messages';
+import { SystemMessage, HumanMessage, AIMessage } from '@langchain/core/messages';
 import { ChatOpenAI } from '@langchain/openai';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -52,7 +52,11 @@ export class ChatService {
     }
   }
 
-  async processQuery(query: string, machineId?: number): Promise<string> {
+  async processQuery(
+    query: string, 
+    machineId?: number, 
+    conversationHistory: Array<{ text: string; isUser: boolean }> = []
+  ): Promise<string> {
     try {
       console.log(`Processing query with machineId: ${machineId}, query: ${query}`);
       
@@ -81,10 +85,24 @@ export class ChatService {
         maxTokens: 1000,
       });
 
-      const messages = [
+      // Build messages array with conversation history
+      const messages: any[] = [
         new SystemMessage(systemPrompt),
-        new HumanMessage(query),
       ];
+
+      // Add conversation history (last 5 exchanges to keep context manageable)
+      const recentHistory = conversationHistory.slice(-10); // Last 10 messages (5 exchanges)
+      for (const msg of recentHistory) {
+        if (msg.isUser) {
+          messages.push(new HumanMessage(msg.text));
+        } else {
+          // Add assistant responses as AIMessage for proper conversation flow
+          messages.push(new AIMessage(msg.text));
+        }
+      }
+
+      // Add current query
+      messages.push(new HumanMessage(query));
 
       const response = await model.invoke(messages);
       const responseText = response.content as string;

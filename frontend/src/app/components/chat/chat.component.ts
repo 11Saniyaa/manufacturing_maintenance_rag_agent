@@ -23,6 +23,14 @@ export class ChatComponent implements OnChanges, AfterViewChecked {
   isLoading: boolean = false;
   selectedMachine?: Machine;
   private shouldScroll: boolean = false;
+  
+  // Example queries for quick access
+  exampleQueries: string[] = [
+    'What does error code E45 mean?',
+    'How do I fix motor overheating?',
+    'What maintenance is needed for conveyors?',
+    'How to troubleshoot low air pressure?'
+  ];
 
   constructor(
     private chatService: ChatService,
@@ -112,7 +120,14 @@ export class ChatComponent implements OnChanges, AfterViewChecked {
     // Debug log to verify machine ID is being sent
     console.log('Sending query with machine ID:', this.selectedMachineId);
 
-    this.chatService.sendQuery(query, this.selectedMachineId).subscribe({
+    // Prepare conversation history (last 10 messages for context)
+    const history = this.messages.slice(-10).map(msg => ({
+      text: msg.text,
+      isUser: msg.isUser,
+      timestamp: msg.timestamp.toISOString()
+    }));
+
+    this.chatService.sendQuery(query, this.selectedMachineId, history).subscribe({
       next: (response) => {
         const botMessage: Message = {
           text: response.response,
@@ -142,6 +157,20 @@ export class ChatComponent implements OnChanges, AfterViewChecked {
       event.preventDefault();
       this.sendMessage();
     }
+  }
+
+  clearConversation() {
+    this.messages = [{
+      text: 'Hello! I\'m your maintenance assistant. How can I help you today?',
+      isUser: false,
+      timestamp: new Date()
+    }];
+  }
+
+  useExampleQuery(query: string) {
+    this.currentQuery = query;
+    // Optionally auto-send
+    // this.sendMessage();
   }
 
   formatMessage(text: string): SafeHtml {

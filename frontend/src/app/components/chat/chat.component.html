@@ -1,6 +1,25 @@
 <div class="chat-container">
-  <div class="chat-header" *ngIf="selectedMachine">
-    <span class="machine-badge">Assisting: {{ selectedMachine.name }} ({{ selectedMachine.type }})</span>
+  <div class="chat-header">
+    <div class="header-content">
+      <span class="machine-badge" *ngIf="selectedMachine">
+        Assisting: {{ selectedMachine.name }} ({{ selectedMachine.type }})
+      </span>
+      <button class="clear-button" (click)="clearConversation()" title="Clear conversation">
+        Clear
+      </button>
+    </div>
+  </div>
+  <div class="example-queries" *ngIf="messages.length <= 1">
+    <div class="example-queries-label">Try asking:</div>
+    <div class="example-queries-list">
+      <button 
+        *ngFor="let example of exampleQueries" 
+        class="example-query-btn"
+        (click)="useExampleQuery(example)"
+      >
+        {{ example }}
+      </button>
+    </div>
   </div>
   <div class="chat-messages" #messagesContainer>
     <div *ngFor="let message of messages" class="message" [class.user-message]="message.isUser" [class.bot-message]="!message.isUser">
