@@ -1,61 +1,45 @@
 <div class="chat-container">
   <div class="chat-header">
-    <div class="header-content">
-      <span class="machine-badge" *ngIf="selectedMachine">
-        Assisting: {{ selectedMachine.name }} ({{ selectedMachine.type }})
-      </span>
-      <button class="clear-button" (click)="clearConversation()" title="Clear conversation">
-        Clear
-      </button>
-    </div>
+    <h2>Chat Assistant</h2>
+    <p *ngIf="selectedMachineId" class="machine-context">Context: Machine ID {{ selectedMachineId }}</p>
   </div>
-  <div class="example-queries" *ngIf="messages.length <= 1">
-    <div class="example-queries-label">Try asking:</div>
-    <div class="example-queries-list">
-      <button 
-        *ngFor="let example of exampleQueries" 
-        class="example-query-btn"
-        (click)="useExampleQuery(example)"
-      >
-        {{ example }}
-      </button>
-    </div>
-  </div>
+  
   <div class="chat-messages" #messagesContainer>
-    <div *ngFor="let message of messages" class="message" [class.user-message]="message.isUser" [class.bot-message]="!message.isUser">
+    <div 
+      *ngFor="let message of messages" 
+      [class.user-message]="message.isUser"
+      [class.assistant-message]="!message.isUser"
+      class="message"
+    >
       <div class="message-content">
-        <div class="message-text" [innerHTML]="formatMessage(message.text)"></div>
-        <div class="message-time">{{ message.timestamp | date:'short' }}</div>
+        {{ message.text }}
+      </div>
+      <div class="message-timestamp">
+        {{ message.timestamp | date:'short' }}
       </div>
     </div>
-    <div *ngIf="isLoading" class="message bot-message">
+    <div *ngIf="isLoading" class="message assistant-message">
       <div class="message-content">
-        <div class="message-text">
-          <span class="typing-indicator">
-            <span></span><span></span><span></span>
-          </span>
-          Thinking...
-        </div>
+        <span class="typing-indicator">Thinking...</span>
       </div>
     </div>
   </div>
+  
   <div class="chat-input-container">
-    <input 
-      type="text" 
-      [(ngModel)]="currentQuery" 
-      (keypress)="onKeyPress($event)"
-      placeholder="Ask about maintenance issues, error codes, or troubleshooting..."
+    <textarea
+      [(ngModel)]="currentMessage"
+      (keydown)="onKeyPress($event)"
+      placeholder="Type your question here... (Press Enter to send)"
       class="chat-input"
       [disabled]="isLoading"
-    />
+      rows="2"
+    ></textarea>
     <button 
       (click)="sendMessage()" 
+      [disabled]="!currentMessage.trim() || isLoading"
       class="send-button"
-      [disabled]="!currentQuery.trim() || isLoading"
     >
       Send
     </button>
   </div>
 </div>
-
-
