@@ -6,11 +6,10 @@ import { Component } from '@angular/core';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  title = 'Manufacturing Maintenance RAG Agent';
+  title = 'Maintenance Query Agent';
   selectedMachineId?: number;
 
   onMachineSelected(machineId: number | undefined) {
     this.selectedMachineId = machineId;
   }
 }
-

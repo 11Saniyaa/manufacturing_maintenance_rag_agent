@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { ChatService, ChatResponse } from '../../services/chat.service';
+import { ChatService } from '../../services/chat.service';
 
 export interface Message {
   text: string;
@@ -16,13 +16,16 @@ export class ChatComponent implements OnInit {
   @Input() selectedMachineId?: number;
 
   messages: Message[] = [];
-  currentMessage: string = '';
+  currentQuery: string = '';
   isLoading: boolean = false;
 
   constructor(private chatService: ChatService) { }
 
   ngOnInit() {
-    // Add welcome message
+    this.addWelcomeMessage();
+  }
+
+  addWelcomeMessage() {
     this.messages.push({
       text: 'Hello! I\'m your maintenance assistant. How can I help you today?',
       isUser: false,
@@ -31,24 +34,23 @@ export class ChatComponent implements OnInit {
   }
 
   sendMessage() {
-    if (!this.currentMessage.trim() || this.isLoading) {
+    if (!this.currentQuery.trim() || this.isLoading) {
       return;
     }
 
-    const userMessage = this.currentMessage.trim();
-    this.currentMessage = '';
-
-    // Add user message
-    this.messages.push({
-      text: userMessage,
+    const userMessage: Message = {
+      text: this.currentQuery,
       isUser: true,
       timestamp: new Date()
-    });
+    };
 
-    // Send to API
+    this.messages.push(userMessage);
+    const query = this.currentQuery;
+    this.currentQuery = '';
     this.isLoading = true;
-    this.chatService.sendMessage(userMessage, this.selectedMachineId).subscribe({
-      next: (response: ChatResponse) => {
+
+    this.chatService.sendQuery(query, this.selectedMachineId).subscribe({
+      next: (response) => {
         this.messages.push({
           text: response.response,
           isUser: false,

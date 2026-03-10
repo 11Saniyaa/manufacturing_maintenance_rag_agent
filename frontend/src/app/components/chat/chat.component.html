@@ -1,43 +1,39 @@
 <div class="chat-container">
   <div class="chat-header">
-    <h2>Chat Assistant</h2>
+    <h3>Chat Assistant</h3>
     <p *ngIf="selectedMachineId" class="machine-context">Context: Machine ID {{ selectedMachineId }}</p>
   </div>
   
-  <div class="chat-messages" #messagesContainer>
+  <div class="messages-container" #messagesContainer>
     <div 
       *ngFor="let message of messages" 
       [class.user-message]="message.isUser"
-      [class.assistant-message]="!message.isUser"
+      [class.bot-message]="!message.isUser"
       class="message"
     >
-      <div class="message-content">
-        {{ message.text }}
-      </div>
-      <div class="message-timestamp">
-        {{ message.timestamp | date:'short' }}
-      </div>
+      <div class="message-content">{{ message.text }}</div>
+      <div class="message-time">{{ message.timestamp | date:'short' }}</div>
     </div>
-    <div *ngIf="isLoading" class="message assistant-message">
+    <div *ngIf="isLoading" class="message bot-message">
       <div class="message-content">
         <span class="typing-indicator">Thinking...</span>
       </div>
     </div>
   </div>
   
-  <div class="chat-input-container">
+  <div class="input-container">
     <textarea
-      [(ngModel)]="currentMessage"
-      (keydown)="onKeyPress($event)"
-      placeholder="Type your question here... (Press Enter to send)"
-      class="chat-input"
-      [disabled]="isLoading"
+      [(ngModel)]="currentQuery"
+      (keypress)="onKeyPress($event)"
+      placeholder="Type your question here..."
+      class="message-input"
       rows="2"
+      [disabled]="isLoading"
     ></textarea>
     <button 
       (click)="sendMessage()" 
-      [disabled]="!currentMessage.trim() || isLoading"
       class="send-button"
+      [disabled]="!currentQuery.trim() || isLoading"
     >
       Send
     </button>

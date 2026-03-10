@@ -20,11 +20,8 @@ export class ChatService {
 
   constructor(private http: HttpClient) { }
 
-  sendMessage(query: string, machineId?: number): Observable<ChatResponse> {
-    const body: ChatRequest = {
-      query,
-      machineId
-    };
+  sendQuery(query: string, machineId?: number): Observable<ChatResponse> {
+    const body: ChatRequest = { query, machineId };
     return this.http.post<ChatResponse>(`${this.apiUrl}/chat/query`, body);
   }
 }
