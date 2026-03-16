@@ -1,6 +1,28 @@
 <div class="chat-container">
   <div class="chat-header">
-    <h3>Chat Assistant</h3>
+    <div class="header-top">
+      <h3>Chat Assistant</h3>
+      <div class="audio-controls">
+        <button 
+          class="audio-toggle"
+          [class.active]="isVoiceInputEnabled"
+          (click)="toggleVoiceInput()"
+          title="Toggle Voice Input"
+        >
+          <span class="icon">🎤</span>
+          <span class="label">Voice</span>
+        </button>
+        <button 
+          class="audio-toggle"
+          [class.active]="isTextToSpeechEnabled"
+          (click)="toggleTextToSpeech()"
+          title="Toggle Text-to-Speech"
+        >
+          <span class="icon">🔊</span>
+          <span class="label">Audio</span>
+        </button>
+      </div>
+    </div>
     <p *ngIf="selectedMachineId" class="machine-context">Context: Machine ID {{ selectedMachineId }}</p>
   </div>
   
@@ -22,14 +44,26 @@
   </div>
   
   <div class="input-container">
-    <textarea
-      [(ngModel)]="currentQuery"
-      (keypress)="onKeyPress($event)"
-      placeholder="Type your question here..."
-      class="message-input"
-      rows="2"
-      [disabled]="isLoading"
-    ></textarea>
+    <div class="input-wrapper">
+      <textarea
+        [(ngModel)]="currentQuery"
+        (keypress)="onKeyPress($event)"
+        placeholder="Type your question here or use voice input..."
+        class="message-input"
+        rows="2"
+        [disabled]="isLoading"
+      ></textarea>
+      <button 
+        *ngIf="isVoiceInputEnabled"
+        class="voice-button"
+        [class.recording]="isRecording"
+        (click)="startRecording()"
+        [title]="isRecording ? 'Stop Recording' : 'Start Voice Input'"
+      >
+        <span *ngIf="!isRecording">🎤</span>
+        <span *ngIf="isRecording" class="pulse">🔴</span>
+      </button>
+    </div>
     <button 
       (click)="sendMessage()" 
       class="send-button"
@@ -37,5 +71,9 @@
     >
       Send
     </button>
+  </div>
+  <div *ngIf="isRecording" class="recording-indicator">
+    <span class="pulse-dot"></span>
+    Listening...
   </div>
 </div>
