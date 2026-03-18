@@ -86,6 +86,11 @@
         <span>Auto</span>
       </label>
 
+      <label class="toggle" title="Make answers concise and well-structured">
+        <input type="checkbox" [(ngModel)]="conciseMode" />
+        <span>Concise</span>
+      </label>
+
       <button class="send" type="button" (click)="send()" [disabled]="isSending || !queryText.trim()">
         {{ isSending ? 'Sending…' : 'Send' }}
       </button>

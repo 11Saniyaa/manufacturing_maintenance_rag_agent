@@ -29,6 +29,7 @@ export class ChatComponent implements OnDestroy {
   @Input() selectedMachineId?: number;
 
   language: ChatLanguage = 'en-US';
+  conciseMode = true;
 
   messages: ChatMessage[] = [
     {
@@ -222,6 +223,46 @@ export class ChatComponent implements OnDestroy {
     this.speak(last.content);
   }
 
+  private buildInstructionPrefix(): string {
+    // Keep this short but strongly formatted so the LLM returns readable output.
+    // We prepend it to the user's query to avoid changing the backend.
+    if (this.language === 'hi-IN') {
+      return (
+        'हिंदी में जवाब दें। जवाब संक्षिप्त, स्पष्ट और पढ़ने योग्य रखें। ' +
+        'इस फॉर्मेट का पालन करें:\n' +
+        '1) सारांश (1-2 लाइन)\n' +
+        '2) संभावित कारण (बुलेट)\n' +
+        '3) अगले कदम (क्रमांकित स्टेप्स)\n' +
+        '4) सुरक्षा नोट\n' +
+        '5) कब एस्केलेट करें\n' +
+        'बहुत लंबा टेक्स्ट न लिखें।\n\n'
+      );
+    }
+
+    return (
+      'Answer in a concise, clear, readable format. Follow this template:\n' +
+      '1) Summary (1-2 lines)\n' +
+      '2) Likely causes (bullets)\n' +
+      '3) Next steps (numbered)\n' +
+      '4) Safety note\n' +
+      '5) When to escalate\n' +
+      'Keep it short; avoid long paragraphs.\n\n'
+    );
+  }
+
+  private formatAssistantText(text: string): string {
+    // Light formatting to improve readability in the UI without needing markdown rendering.
+    return (
+      text
+        .replace(/\r\n/g, '\n')
+        // collapse 3+ blank lines to max 2
+        .replace(/\n{3,}/g, '\n\n')
+        // normalize common bullet markers
+        .replace(/^\s*[\*\u2022]\s+/gm, '- ')
+        .trim()
+    );
+  }
+
   send() {
     const text = this.queryText.trim();
     if (!text || this.isSending) return;
@@ -229,6 +270,8 @@ export class ChatComponent implements OnDestroy {
     this.lastError = undefined;
     this.isSending = true;
     this.stopListening();
+
+    const outgoing = this.conciseMode ? `${this.buildInstructionPrefix()}${text}` : text;
 
     this.messages = [
       ...this.messages,
@@ -239,7 +282,7 @@ export class ChatComponent implements OnDestroy {
 
     this.chatService
       .query({
-        query: text,
+        query: outgoing,
         machineId: this.selectedMachineId,
       })
       .pipe(finalize(() => (this.isSending = false)))
@@ -247,7 +290,7 @@ export class ChatComponent implements OnDestroy {
         next: (res) => {
           const assistantMsg: ChatMessage = {
             role: 'assistant',
-            content: res.response,
+            content: this.formatAssistantText(res.response),
             timestamp: new Date(res.timestamp),
           };
           this.messages = [
