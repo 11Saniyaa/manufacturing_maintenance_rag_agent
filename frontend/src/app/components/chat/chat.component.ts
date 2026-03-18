@@ -1,219 +1,254 @@
-import { Component, Input, OnInit, OnDestroy, ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
+import { Component, Input, OnDestroy } from '@angular/core';
+import { finalize } from 'rxjs';
 import { ChatService } from '../../services/chat.service';
 
-export interface Message {
-  text: string;
-  isUser: boolean;
+type ChatMessage = {
+  role: 'user' | 'assistant';
+  content: string;
   timestamp: Date;
-}
+};
+
+type SpeechRecognitionCtor = new () => SpeechRecognition;
+type SpeechRecognitionLike = SpeechRecognition & {
+  lang: string;
+  interimResults: boolean;
+  continuous: boolean;
+  onresult: ((this: SpeechRecognition, ev: SpeechRecognitionEvent) => any) | null;
+  onerror: ((this: SpeechRecognition, ev: SpeechRecognitionErrorEvent) => any) | null;
+  onend: ((this: SpeechRecognition, ev: Event) => any) | null;
+};
 
 @Component({
   selector: 'app-chat',
   templateUrl: './chat.component.html',
-  styleUrls: ['./chat.component.css']
+  styleUrls: ['./chat.component.css'],
 })
-export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
+export class ChatComponent implements OnDestroy {
   @Input() selectedMachineId?: number;
-  @ViewChild('messagesContainer') messagesContainer!: ElementRef;
 
-  messages: Message[] = [];
-  currentQuery: string = '';
-  isLoading: boolean = false;
+  messages: ChatMessage[] = [
+    {
+      role: 'assistant',
+      content:
+        'Hi! Describe the issue you’re seeing (symptoms, error codes, when it started). I’ll suggest safe troubleshooting steps.',
+      timestamp: new Date(),
+    },
+  ];
 
-  // Audio features
-  isVoiceInputEnabled: boolean = false;
-  isTextToSpeechEnabled: boolean = false;
-  isRecording: boolean = false;
-  recognition: any;
-  synthesis: SpeechSynthesis;
-  currentUtterance: SpeechSynthesisUtterance | null = null;
+  queryText = '';
+  isSending = false;
+  lastError?: string;
+
+  // Speech-to-text (Web Speech API)
+  readonly canUseSpeechToText: boolean;
+  isListening = false;
+  sttStatus?: string;
+  private recognition?: SpeechRecognitionLike;
+  private interimTranscript = '';
+
+  // Text-to-speech (SpeechSynthesis API)
+  readonly canUseTextToSpeech: boolean;
+  autoSpeakReplies = false;
+  isSpeaking = false;
 
   constructor(private chatService: ChatService) {
-    this.synthesis = window.speechSynthesis;
-    this.initializeSpeechRecognition();
+    this.canUseSpeechToText = !!this.getSpeechRecognitionCtor();
+    this.canUseTextToSpeech =
+      typeof window !== 'undefined' &&
+      !!window.speechSynthesis &&
+      typeof SpeechSynthesisUtterance !== 'undefined';
   }
 
-  ngOnInit() {
-    this.addWelcomeMessage();
-  }
-
-  ngOnDestroy() {
-    this.stopRecording();
+  ngOnDestroy(): void {
+    this.stopListening();
     this.stopSpeaking();
   }
 
-  ngAfterViewChecked() {
-    this.scrollToBottom();
+  private getSpeechRecognitionCtor(): SpeechRecognitionCtor | undefined {
+    const w = window as any;
+    return (w.SpeechRecognition || w.webkitSpeechRecognition) as SpeechRecognitionCtor | undefined;
   }
 
-  scrollToBottom() {
-    try {
-      const element = this.messagesContainer.nativeElement;
-      element.scrollTop = element.scrollHeight;
-    } catch (err) {
-      console.error('Error scrolling:', err);
-    }
+  private initSpeechRecognition(): SpeechRecognitionLike | undefined {
+    const Ctor = this.getSpeechRecognitionCtor();
+    if (!Ctor) return undefined;
+
+    const rec = new Ctor() as SpeechRecognitionLike;
+    rec.lang = 'en-US';
+    rec.interimResults = true;
+    rec.continuous = false;
+
+    rec.onresult = (event: SpeechRecognitionEvent) => {
+      let finalText = '';
+      let interimText = '';
+
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const res = event.results[i];
+        const transcript = res[0]?.transcript ?? '';
+        if (res.isFinal) finalText += transcript;
+        else interimText += transcript;
+      }
+
+      this.interimTranscript = interimText.trim();
+      const combined = `${this.queryText} ${finalText}`.trim();
+      if (finalText.trim()) this.queryText = combined;
+
+      if (this.interimTranscript) {
+        this.sttStatus = `Listening… ${this.interimTranscript}`;
+      } else {
+        this.sttStatus = 'Listening…';
+      }
+    };
+
+    rec.onerror = (event: SpeechRecognitionErrorEvent) => {
+      console.error('Speech recognition error:', event);
+      this.sttStatus = `Mic error: ${event.error}`;
+      this.isListening = false;
+    };
+
+    rec.onend = () => {
+      this.isListening = false;
+      this.interimTranscript = '';
+      if (!this.sttStatus?.startsWith('Mic error')) this.sttStatus = undefined;
+    };
+
+    return rec;
   }
 
-  initializeSpeechRecognition() {
-    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-      this.recognition = new SpeechRecognition();
-      this.recognition.continuous = false;
-      this.recognition.interimResults = false;
-      this.recognition.lang = 'en-US';
-
-      this.recognition.onresult = (event: any) => {
-        const transcript = event.results[0][0].transcript;
-        this.currentQuery = transcript;
-        this.isRecording = false;
-      };
-
-      this.recognition.onerror = (event: any) => {
-        console.error('Speech recognition error:', event.error);
-        this.isRecording = false;
-        if (event.error === 'no-speech') {
-          alert('No speech detected. Please try again.');
-        }
-      };
-
-      this.recognition.onend = () => {
-        this.isRecording = false;
-      };
-    } else {
-      console.warn('Speech recognition not supported in this browser');
-    }
-  }
-
-  addWelcomeMessage() {
-    this.messages.push({
-      text: 'Hello! I\'m your maintenance assistant. How can I help you today?',
-      isUser: false,
-      timestamp: new Date()
-    });
-  }
-
-  toggleVoiceInput() {
-    this.isVoiceInputEnabled = !this.isVoiceInputEnabled;
-    if (!this.isVoiceInputEnabled) {
-      this.stopRecording();
-    }
-  }
-
-  toggleTextToSpeech() {
-    this.isTextToSpeechEnabled = !this.isTextToSpeechEnabled;
-    if (!this.isTextToSpeechEnabled) {
-      this.stopSpeaking();
-    }
-  }
-
-  startRecording() {
+  startListening() {
+    if (this.isListening) return;
+    if (!this.recognition) this.recognition = this.initSpeechRecognition();
     if (!this.recognition) {
-      alert('Speech recognition is not supported in your browser. Please use Chrome or Edge.');
-      return;
-    }
-
-    if (this.isRecording) {
-      this.stopRecording();
+      this.sttStatus = 'Speech-to-text not supported in this browser.';
       return;
     }
 
     try {
-      this.isRecording = true;
+      this.sttStatus = 'Listening…';
+      this.isListening = true;
       this.recognition.start();
-    } catch (error) {
-      console.error('Error starting recognition:', error);
-      this.isRecording = false;
+    } catch (e) {
+      // Can throw if called twice quickly
+      console.error('Failed to start recognition:', e);
+      this.isListening = false;
+      this.sttStatus = 'Could not start microphone.';
     }
   }
 
-  stopRecording() {
-    if (this.recognition && this.isRecording) {
-      this.recognition.stop();
-      this.isRecording = false;
-    }
-  }
-
-  speakText(text: string) {
-    if (!this.isTextToSpeechEnabled || !this.synthesis) {
+  stopListening() {
+    if (!this.recognition) {
+      this.isListening = false;
       return;
     }
+    try {
+      this.recognition.stop();
+    } catch {
+      // ignore
+    } finally {
+      this.isListening = false;
+      this.interimTranscript = '';
+    }
+  }
 
-    this.stopSpeaking();
+  toggleListening() {
+    if (this.isListening) this.stopListening();
+    else this.startListening();
+  }
 
-    this.currentUtterance = new SpeechSynthesisUtterance(text);
-    this.currentUtterance.rate = 1.0;
-    this.currentUtterance.pitch = 1.0;
-    this.currentUtterance.volume = 1.0;
-    this.currentUtterance.lang = 'en-US';
+  private speak(text: string) {
+    if (!this.canUseTextToSpeech) return;
+    const synth = window.speechSynthesis;
+    if (!synth) return;
 
-    this.currentUtterance.onend = () => {
-      this.currentUtterance = null;
+    // Stop any existing speech first
+    synth.cancel();
+    this.isSpeaking = true;
+
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.rate = 1;
+    utter.pitch = 1;
+    utter.onend = () => {
+      this.isSpeaking = false;
+    };
+    utter.onerror = (e) => {
+      console.error('Speech synthesis error:', e);
+      this.isSpeaking = false;
     };
 
-    this.currentUtterance.onerror = (error) => {
-      console.error('Speech synthesis error:', error);
-      this.currentUtterance = null;
-    };
-
-    this.synthesis.speak(this.currentUtterance);
+    synth.speak(utter);
   }
 
   stopSpeaking() {
-    if (this.synthesis && this.synthesis.speaking) {
-      this.synthesis.cancel();
-    }
-    this.currentUtterance = null;
+    const synth = window.speechSynthesis;
+    if (!synth) return;
+    synth.cancel();
+    this.isSpeaking = false;
   }
 
-  sendMessage() {
-    if (!this.currentQuery.trim() || this.isLoading) {
-      return;
-    }
-
-    const userMessage: Message = {
-      text: this.currentQuery,
-      isUser: true,
-      timestamp: new Date()
-    };
-
-    this.messages.push(userMessage);
-    const query = this.currentQuery;
-    this.currentQuery = '';
-    this.isLoading = true;
-
-    this.chatService.sendQuery(query, this.selectedMachineId).subscribe({
-      next: (response) => {
-        const botMessage: Message = {
-          text: response.response,
-          isUser: false,
-          timestamp: new Date(response.timestamp)
-        };
-        this.messages.push(botMessage);
-        this.isLoading = false;
-        
-        // Speak the response if text-to-speech is enabled
-        if (this.isTextToSpeechEnabled) {
-          setTimeout(() => this.speakText(response.response), 100);
-        }
-      },
-      error: (error) => {
-        console.error('Error sending message:', error);
-        const errorMessage: Message = {
-          text: 'Sorry, I encountered an error. Please try again.',
-          isUser: false,
-          timestamp: new Date()
-        };
-        this.messages.push(errorMessage);
-        this.isLoading = false;
-      }
-    });
+  speakLastAssistantMessage() {
+    const last = [...this.messages].reverse().find((m) => m.role === 'assistant');
+    if (!last) return;
+    this.speak(last.content);
   }
 
-  onKeyPress(event: KeyboardEvent) {
+  send() {
+    const text = this.queryText.trim();
+    if (!text || this.isSending) return;
+
+    this.lastError = undefined;
+    this.isSending = true;
+    this.stopListening();
+
+    this.messages = [
+      ...this.messages,
+      { role: 'user', content: text, timestamp: new Date() },
+    ];
+
+    this.queryText = '';
+
+    this.chatService
+      .query({
+        query: text,
+        machineId: this.selectedMachineId,
+      })
+      .pipe(finalize(() => (this.isSending = false)))
+      .subscribe({
+        next: (res) => {
+          const assistantMsg: ChatMessage = {
+            role: 'assistant',
+            content: res.response,
+            timestamp: new Date(res.timestamp),
+          };
+          this.messages = [
+            ...this.messages,
+            assistantMsg,
+          ];
+          if (this.autoSpeakReplies) this.speak(assistantMsg.content);
+        },
+        error: (err) => {
+          console.error('Chat query failed:', err);
+          this.lastError = 'Could not reach the backend chat service. Is the backend running on port 3000?';
+          this.messages = [
+            ...this.messages,
+            {
+              role: 'assistant',
+              content:
+                "I couldn't reach the backend chat service. Please start the backend (port 3000) and try again.",
+              timestamp: new Date(),
+            },
+          ];
+        },
+      });
+  }
+
+  onKeyDown(event: KeyboardEvent) {
     if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault();
-      this.sendMessage();
+      this.send();
     }
+  }
+
+  trackByIndex(index: number) {
+    return index;
   }
 }

@@ -1,79 +1,87 @@
-<div class="chat-container">
+<div class="chat-card">
   <div class="chat-header">
-    <div class="header-top">
-      <h3>Chat Assistant</h3>
-      <div class="audio-controls">
-        <button 
-          class="audio-toggle"
-          [class.active]="isVoiceInputEnabled"
-          (click)="toggleVoiceInput()"
-          title="Toggle Voice Input"
-        >
-          <span class="icon">🎤</span>
-          <span class="label">Voice</span>
-        </button>
-        <button 
-          class="audio-toggle"
-          [class.active]="isTextToSpeechEnabled"
-          (click)="toggleTextToSpeech()"
-          title="Toggle Text-to-Speech"
-        >
-          <span class="icon">🔊</span>
-          <span class="label">Audio</span>
-        </button>
-      </div>
-    </div>
-    <p *ngIf="selectedMachineId" class="machine-context">Context: Machine ID {{ selectedMachineId }}</p>
-  </div>
-  
-  <div class="messages-container" #messagesContainer>
-    <div 
-      *ngFor="let message of messages" 
-      [class.user-message]="message.isUser"
-      [class.bot-message]="!message.isUser"
-      class="message"
-    >
-      <div class="message-content">{{ message.text }}</div>
-      <div class="message-time">{{ message.timestamp | date:'short' }}</div>
-    </div>
-    <div *ngIf="isLoading" class="message bot-message">
-      <div class="message-content">
-        <span class="typing-indicator">Thinking...</span>
-      </div>
+    <div class="title">Maintenance Assistant</div>
+    <div class="meta">
+      <span *ngIf="selectedMachineId; else allMachines">Machine: #{{ selectedMachineId }}</span>
+      <ng-template #allMachines>All machines</ng-template>
     </div>
   </div>
-  
-  <div class="input-container">
-    <div class="input-wrapper">
-      <textarea
-        [(ngModel)]="currentQuery"
-        (keypress)="onKeyPress($event)"
-        placeholder="Type your question here or use voice input..."
-        class="message-input"
-        rows="2"
-        [disabled]="isLoading"
-      ></textarea>
-      <button 
-        *ngIf="isVoiceInputEnabled"
-        class="voice-button"
-        [class.recording]="isRecording"
-        (click)="startRecording()"
-        [title]="isRecording ? 'Stop Recording' : 'Start Voice Input'"
+
+  <div class="chat-body">
+    <div class="messages">
+      <div *ngFor="let msg of messages; trackBy: trackByIndex" class="message" [class.user]="msg.role === 'user'" [class.assistant]="msg.role === 'assistant'">
+        <div class="bubble">
+          <div class="content" [innerText]="msg.content"></div>
+          <div class="time">{{ msg.timestamp | date:'shortTime' }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="lastError" class="error">{{ lastError }}</div>
+  </div>
+
+  <div class="chat-footer">
+    <textarea
+      class="input"
+      rows="2"
+      placeholder="Ask a maintenance question…"
+      [(ngModel)]="queryText"
+      (keydown)="onKeyDown($event)"
+      [disabled]="isSending"
+    ></textarea>
+    <div class="actions">
+      <button
+        class="icon"
+        type="button"
+        title="Speak your question"
+        (click)="toggleListening()"
+        [disabled]="isSending || !canUseSpeechToText"
+        [class.active]="isListening"
       >
-        <span *ngIf="!isRecording">🎤</span>
-        <span *ngIf="isRecording" class="pulse">🔴</span>
+        {{ isListening ? '■' : '🎤' }}
+      </button>
+
+      <button
+        *ngIf="isListening"
+        class="icon stop"
+        type="button"
+        title="Stop microphone"
+        (click)="stopListening()"
+      >
+        Stop
+      </button>
+
+      <button
+        class="icon"
+        type="button"
+        title="Read the last answer aloud"
+        (click)="speakLastAssistantMessage()"
+        [disabled]="!canUseTextToSpeech"
+      >
+        🔊
+      </button>
+
+      <button
+        *ngIf="isSpeaking"
+        class="icon stop"
+        type="button"
+        title="Stop voice"
+        (click)="stopSpeaking()"
+      >
+        Stop
+      </button>
+
+      <label class="toggle" [class.disabled]="!canUseTextToSpeech" title="Automatically read assistant replies aloud">
+        <input type="checkbox" [(ngModel)]="autoSpeakReplies" [disabled]="!canUseTextToSpeech" />
+        <span>Auto</span>
+      </label>
+
+      <button class="send" type="button" (click)="send()" [disabled]="isSending || !queryText.trim()">
+        {{ isSending ? 'Sending…' : 'Send' }}
       </button>
     </div>
-    <button 
-      (click)="sendMessage()" 
-      class="send-button"
-      [disabled]="!currentQuery.trim() || isLoading"
-    >
-      Send
-    </button>
   </div>
-  <div *ngIf="isRecording" class="recording-indicator">
-    <span class="pulse-dot"></span>
-    Listening...
-  </div>
+
+  <div *ngIf="sttStatus" class="stt-status">{{ sttStatus }}</div>
+  <div *ngIf="isSpeaking" class="tts-status">Speaking…</div>
 </div>
