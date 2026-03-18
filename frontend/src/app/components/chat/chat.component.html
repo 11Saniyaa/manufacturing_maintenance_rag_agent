@@ -5,6 +5,16 @@
       <span *ngIf="selectedMachineId; else allMachines">Machine: #{{ selectedMachineId }}</span>
       <ng-template #allMachines>All machines</ng-template>
     </div>
+
+    <div class="lang">
+      <label>
+        <span class="lang-label">Lang</span>
+        <select [(ngModel)]="language" (change)="onLanguageChange()" title="Speech language">
+          <option value="en-US">English</option>
+          <option value="hi-IN">Hindi</option>
+        </select>
+      </label>
+    </div>
   </div>
 
   <div class="chat-body">

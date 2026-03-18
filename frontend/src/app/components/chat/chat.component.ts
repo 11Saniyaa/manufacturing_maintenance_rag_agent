@@ -8,6 +8,8 @@ type ChatMessage = {
   timestamp: Date;
 };
 
+type ChatLanguage = 'en-US' | 'hi-IN';
+
 type SpeechRecognitionCtor = new () => SpeechRecognition;
 type SpeechRecognitionLike = SpeechRecognition & {
   lang: string;
@@ -25,6 +27,8 @@ type SpeechRecognitionLike = SpeechRecognition & {
 })
 export class ChatComponent implements OnDestroy {
   @Input() selectedMachineId?: number;
+
+  language: ChatLanguage = 'en-US';
 
   messages: ChatMessage[] = [
     {
@@ -74,7 +78,7 @@ export class ChatComponent implements OnDestroy {
     if (!Ctor) return undefined;
 
     const rec = new Ctor() as SpeechRecognitionLike;
-    rec.lang = 'en-US';
+    rec.lang = this.language;
     rec.interimResults = true;
     rec.continuous = false;
 
@@ -123,6 +127,9 @@ export class ChatComponent implements OnDestroy {
       return;
     }
 
+    // ensure language is current (in case user changed dropdown)
+    this.recognition.lang = this.language;
+
     try {
       this.sttStatus = 'Listening…';
       this.isListening = true;
@@ -165,6 +172,12 @@ export class ChatComponent implements OnDestroy {
     this.isSpeaking = true;
 
     const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = this.language;
+    // Try to select a voice that matches the chosen language (if available).
+    // Note: some browsers only populate voices asynchronously; in that case,
+    // setting `utter.lang` still helps pick a reasonable default.
+    const voice = this.pickVoiceForLang(this.language);
+    if (voice) utter.voice = voice;
     utter.rate = 1;
     utter.pitch = 1;
     utter.onend = () => {
@@ -176,6 +189,24 @@ export class ChatComponent implements OnDestroy {
     };
 
     synth.speak(utter);
+  }
+
+  private pickVoiceForLang(lang: ChatLanguage): SpeechSynthesisVoice | undefined {
+    const synth = window.speechSynthesis;
+    if (!synth) return undefined;
+    const voices = synth.getVoices?.() ?? [];
+    if (!voices.length) return undefined;
+    return (
+      voices.find((v) => (v.lang || '').toLowerCase().startsWith(lang.toLowerCase())) ||
+      voices.find((v) => (v.lang || '').toLowerCase().startsWith(lang.split('-')[0].toLowerCase()))
+    );
+  }
+
+  onLanguageChange() {
+    // Apply to active STT session if currently listening
+    if (this.recognition) {
+      this.recognition.lang = this.language;
+    }
   }
 
   stopSpeaking() {
