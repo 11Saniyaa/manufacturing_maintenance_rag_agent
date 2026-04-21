@@ -5,11 +5,13 @@ import { AssistantComponent } from './pages/assistant/assistant.component';
 import { ErrorCodesComponent } from './pages/error-codes/error-codes.component';
 import { MachinesComponent } from './pages/machines/machines.component';
 import { PhotoDiagnosisComponent } from './pages/photo-diagnosis/photo-diagnosis.component';
+import { ParameterDiagnosisComponent } from './pages/parameter-diagnosis/parameter-diagnosis.component';
 
 const routes: Routes = [
   { path: '', component: HomeComponent },
   { path: 'assistant', component: AssistantComponent },
   { path: 'photo-diagnosis', component: PhotoDiagnosisComponent },
+  { path: 'parameter-diagnosis', component: ParameterDiagnosisComponent },
   { path: 'error-codes', component: ErrorCodesComponent },
   { path: 'machines', component: MachinesComponent },
   { path: '**', redirectTo: '' },

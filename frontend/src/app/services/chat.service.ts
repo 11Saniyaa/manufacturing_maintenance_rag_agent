@@ -13,6 +13,20 @@ export interface ImageDiagnosisRequest {
   note?: string;
 }
 
+export interface ParameterDiagnosisRequest {
+  machineId?: number;
+  machineType?: string;
+  temperatureC: number;
+  vibrationMmS: number;
+  currentA: number;
+  oilPressureBar?: number;
+  rpm: number;
+  runtimeHours: number;
+  noiseLevel: 'normal' | 'unusual';
+  leakObserved: boolean;
+  note?: string;
+}
+
 export interface ChatQueryResponse {
   response: string;
   timestamp: string;
@@ -32,5 +46,9 @@ export class ChatService {
 
   diagnoseImage(request: ImageDiagnosisRequest): Observable<ChatQueryResponse> {
     return this.http.post<ChatQueryResponse>(`${this.apiUrl}/chat/diagnose-image`, request);
+  }
+
+  diagnoseParameters(request: ParameterDiagnosisRequest): Observable<ChatQueryResponse> {
+    return this.http.post<ChatQueryResponse>(`${this.apiUrl}/chat/diagnose-parameters`, request);
   }
 }

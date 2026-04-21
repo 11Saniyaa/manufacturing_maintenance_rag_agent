@@ -164,6 +164,93 @@ let ChatService = class ChatService {
             return 'Could not analyze this image right now. Please try again in a moment.';
         }
     }
+    async diagnoseParameters(request) {
+        try {
+            const machine = request.machineId ? await this.machineService.findOne(request.machineId) : null;
+            const machineType = (machine?.type || request.machineType || 'General').trim();
+            const thresholds = this.getThresholdsForMachineType(machineType);
+            const flags = [];
+            let score = 0;
+            if (request.temperatureC >= thresholds.tempCritical) {
+                score += 3;
+                flags.push(`Temperature is critical (${request.temperatureC} deg C)`);
+            }
+            else if (request.temperatureC >= thresholds.tempWarn) {
+                score += 2;
+                flags.push(`Temperature is high (${request.temperatureC} deg C)`);
+            }
+            if (request.vibrationMmS >= thresholds.vibrationCritical) {
+                score += 3;
+                flags.push(`Vibration is critical (${request.vibrationMmS} mm/s)`);
+            }
+            else if (request.vibrationMmS >= thresholds.vibrationWarn) {
+                score += 2;
+                flags.push(`Vibration is elevated (${request.vibrationMmS} mm/s)`);
+            }
+            if (request.currentA >= thresholds.currentCritical) {
+                score += 3;
+                flags.push(`Current draw is critical (${request.currentA} A)`);
+            }
+            else if (request.currentA >= thresholds.currentWarn) {
+                score += 2;
+                flags.push(`Current draw is high (${request.currentA} A)`);
+            }
+            if (request.oilPressureBar !== undefined && request.oilPressureBar < thresholds.oilPressureMin) {
+                score += 2;
+                flags.push(`Oil pressure is below safe minimum (${request.oilPressureBar} bar)`);
+            }
+            if (request.noiseLevel === 'unusual') {
+                score += 1;
+                flags.push('Unusual noise reported');
+            }
+            if (request.leakObserved) {
+                score += 2;
+                flags.push('Leak observed');
+            }
+            if (request.runtimeHours > thresholds.runtimeWarnHours) {
+                score += 1;
+                flags.push(`Long runtime since last maintenance (${request.runtimeHours} hours)`);
+            }
+            let condition = 'Normal';
+            if (score >= 7)
+                condition = 'Critical';
+            else if (score >= 3)
+                condition = 'Warning';
+            const likelyIssue = this.getLikelyIssue(machineType, flags);
+            const immediateActions = this.getImmediateActions(machineType, condition, request);
+            const escalateRule = condition === 'Critical'
+                ? 'Stop machine and escalate to maintenance lead immediately.'
+                : 'Escalate if readings remain high after first corrective checks.';
+            const summaryLines = [
+                `Condition: ${condition}`,
+                `Machine: ${machine?.name || machineType}`,
+                '',
+                'Detected Risk Signals:',
+                ...(flags.length ? flags.map((f, i) => `${i + 1}. ${f}`) : ['1. No major abnormal parameter detected']),
+                '',
+                `Likely Issue: ${likelyIssue}`,
+                '',
+                'Immediate Actions:',
+                ...immediateActions.map((a, i) => `${i + 1}. ${a}`),
+                '',
+                `Escalation: ${escalateRule}`,
+            ];
+            if (request.note?.trim()) {
+                summaryLines.push('', `Operator Note: ${request.note.trim()}`);
+            }
+            const response = summaryLines.join('\n');
+            await this.queryLogService.create({
+                query: `[PARAMETERS] ${machine?.name || machineType}`,
+                response,
+                machineId: request.machineId || null,
+            });
+            return response;
+        }
+        catch (error) {
+            console.error('Error diagnosing parameters:', error);
+            return 'Could not analyze machine parameters right now. Please retry with valid readings.';
+        }
+    }
     estimateDataUrlBytes(dataUrl) {
         const commaIndex = dataUrl.indexOf(',');
         if (commaIndex === -1)
@@ -171,6 +258,107 @@ let ChatService = class ChatService {
         const base64 = dataUrl.slice(commaIndex + 1);
         const padding = base64.endsWith('==') ? 2 : base64.endsWith('=') ? 1 : 0;
         return Math.floor((base64.length * 3) / 4) - padding;
+    }
+    getThresholdsForMachineType(machineType) {
+        const type = machineType.toLowerCase();
+        if (type.includes('conveyor')) {
+            return {
+                tempWarn: 70,
+                tempCritical: 85,
+                vibrationWarn: 5.5,
+                vibrationCritical: 8,
+                currentWarn: 18,
+                currentCritical: 24,
+                oilPressureMin: 1.5,
+                runtimeWarnHours: 220,
+            };
+        }
+        if (type.includes('motor')) {
+            return {
+                tempWarn: 75,
+                tempCritical: 90,
+                vibrationWarn: 4.5,
+                vibrationCritical: 7,
+                currentWarn: 20,
+                currentCritical: 28,
+                oilPressureMin: 1.2,
+                runtimeWarnHours: 180,
+            };
+        }
+        if (type.includes('cnc')) {
+            return {
+                tempWarn: 65,
+                tempCritical: 80,
+                vibrationWarn: 3.8,
+                vibrationCritical: 6,
+                currentWarn: 16,
+                currentCritical: 22,
+                oilPressureMin: 2.0,
+                runtimeWarnHours: 140,
+            };
+        }
+        if (type.includes('air compressor')) {
+            return {
+                tempWarn: 85,
+                tempCritical: 100,
+                vibrationWarn: 5,
+                vibrationCritical: 7.5,
+                currentWarn: 22,
+                currentCritical: 30,
+                oilPressureMin: 2.5,
+                runtimeWarnHours: 160,
+            };
+        }
+        return {
+            tempWarn: 75,
+            tempCritical: 90,
+            vibrationWarn: 5,
+            vibrationCritical: 7.5,
+            currentWarn: 20,
+            currentCritical: 28,
+            oilPressureMin: 1.5,
+            runtimeWarnHours: 180,
+        };
+    }
+    getLikelyIssue(machineType, flags) {
+        const signalText = flags.join(' ').toLowerCase();
+        if (signalText.includes('leak'))
+            return 'Seal or line leakage with performance loss risk';
+        if (signalText.includes('vibration') && signalText.includes('temperature'))
+            return 'Bearing wear or misalignment causing friction heating';
+        if (signalText.includes('current draw'))
+            return 'Electrical overload or mechanical binding';
+        if (machineType.toLowerCase().includes('air compressor'))
+            return 'Pressure regulation or compressor stage efficiency issue';
+        if (machineType.toLowerCase().includes('cnc'))
+            return 'Spindle or axis drive stress condition';
+        return 'General stress condition; inspect mechanical and electrical loads';
+    }
+    getImmediateActions(machineType, condition, request) {
+        const actions = [
+            'Reduce machine load and recheck key readings after 10-15 minutes.',
+            'Inspect cooling path, vents, and lubrication points.',
+            'Check fasteners, alignment, and visible wear components.',
+        ];
+        if (request.leakObserved) {
+            actions.unshift('Contain leak safely and inspect seals/hoses before normal operation.');
+        }
+        if (request.noiseLevel === 'unusual') {
+            actions.push('Perform acoustic check near bearings, couplings, and motor mounts.');
+        }
+        if (machineType.toLowerCase().includes('conveyor')) {
+            actions.push('Check belt tension, pulley alignment, and material buildup on rollers.');
+        }
+        if (machineType.toLowerCase().includes('cnc')) {
+            actions.push('Inspect spindle/tool holder condition and verify coolant flow.');
+        }
+        if (machineType.toLowerCase().includes('air compressor')) {
+            actions.push('Check air filter, intake path, and pressure regulator settings.');
+        }
+        if (condition === 'Critical') {
+            actions.unshift('Move machine to safe state; avoid continued production load.');
+        }
+        return actions.slice(0, 6);
     }
     getDefaultBaseUrl(provider) {
         switch (provider.toLowerCase()) {

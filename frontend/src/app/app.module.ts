@@ -13,6 +13,7 @@ import { AssistantComponent } from './pages/assistant/assistant.component';
 import { ErrorCodesComponent } from './pages/error-codes/error-codes.component';
 import { MachinesComponent } from './pages/machines/machines.component';
 import { PhotoDiagnosisComponent } from './pages/photo-diagnosis/photo-diagnosis.component';
+import { ParameterDiagnosisComponent } from './pages/parameter-diagnosis/parameter-diagnosis.component';
 
 @NgModule({
   declarations: [
@@ -24,7 +25,8 @@ import { PhotoDiagnosisComponent } from './pages/photo-diagnosis/photo-diagnosis
     AssistantComponent,
     ErrorCodesComponent,
     MachinesComponent,
-    PhotoDiagnosisComponent
+    PhotoDiagnosisComponent,
+    ParameterDiagnosisComponent
   ],
   imports: [
     BrowserModule,
