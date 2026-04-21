@@ -158,10 +158,35 @@
   cursor: not-allowed;
 }
 
+.photo-send {
+  background: #146c43;
+}
+
+.photo-send:hover:not(:disabled) {
+  background: #0f5132;
+}
+
 .actions {
   display: flex;
   gap: 8px;
   align-items: center;
+  flex-wrap: wrap;
+}
+
+.upload {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  background: #ffffff;
+  cursor: pointer;
+}
+
+.upload input {
+  display: none;
 }
 
 .icon {
@@ -220,4 +245,25 @@
   margin-top: 6px;
   font-size: 0.9rem;
   color: #0b5ed7;
+}
+
+.image-preview-wrap {
+  margin-top: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.image-preview {
+  width: 100%;
+  max-height: 180px;
+  object-fit: cover;
+  display: block;
+}
+
+.image-preview-label {
+  font-size: 0.85rem;
+  color: #555;
+  padding: 6px 10px;
 }

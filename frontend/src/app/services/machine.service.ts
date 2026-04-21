@@ -7,6 +7,7 @@ export interface Machine {
   name: string;
   type: string;
   description?: string;
+  imageUrl?: string;
   manufacturer?: string;
   model?: string;
   commonIssues?: string[];
@@ -28,6 +29,8 @@ export class MachineService {
     return this.http.get<Machine>(`${this.apiUrl}/machines/${id}`);
   }
 }
+
+
 
 
 

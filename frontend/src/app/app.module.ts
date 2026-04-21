@@ -7,18 +7,30 @@ import { AppComponent } from './app.component';
 import { ChatComponent } from './components/chat/chat.component';
 import { MachineSelectorComponent } from './components/machine-selector/machine-selector.component';
 import { ErrorCodeSearchComponent } from './components/error-code-search/error-code-search.component';
+import { AppRoutingModule } from './app-routing.module';
+import { HomeComponent } from './pages/home/home.component';
+import { AssistantComponent } from './pages/assistant/assistant.component';
+import { ErrorCodesComponent } from './pages/error-codes/error-codes.component';
+import { MachinesComponent } from './pages/machines/machines.component';
+import { PhotoDiagnosisComponent } from './pages/photo-diagnosis/photo-diagnosis.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     ChatComponent,
     MachineSelectorComponent,
-    ErrorCodeSearchComponent
+    ErrorCodeSearchComponent,
+    HomeComponent,
+    AssistantComponent,
+    ErrorCodesComponent,
+    MachinesComponent,
+    PhotoDiagnosisComponent
   ],
   imports: [
     BrowserModule,
     HttpClientModule,
-    FormsModule
+    FormsModule,
+    AppRoutingModule
   ],
   providers: [],
   bootstrap: [AppComponent]

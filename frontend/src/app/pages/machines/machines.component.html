@@ -1,0 +1,19 @@
+<section class="page-header">
+  <h2>Machine Directory</h2>
+  <p>Select a machine to preview and use that context in the assistant workflow.</p>
+</section>
+
+<section class="machine-layout">
+  <div class="selector-wrap">
+    <app-machine-selector (machineSelected)="onMachineSelected($event)"></app-machine-selector>
+  </div>
+
+  <div class="info-card">
+    <h3>Current Selection</h3>
+    <p *ngIf="selectedMachineId; else allMachines">Machine ID: #{{ selectedMachineId }}</p>
+    <ng-template #allMachines>
+      <p>All machines selected. Pick one machine for focused diagnostics.</p>
+    </ng-template>
+    <a routerLink="/assistant" class="open-assistant">Open AI Assistant</a>
+  </div>
+</section>

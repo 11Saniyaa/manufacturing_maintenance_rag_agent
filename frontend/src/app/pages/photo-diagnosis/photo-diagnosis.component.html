@@ -1,0 +1,23 @@
+<section class="page-header">
+  <h2>Photo Diagnosis</h2>
+  <p>Upload a machine photo and get likely faults, safe checks, and next actions.</p>
+</section>
+
+<section class="diagnosis-layout">
+  <aside class="side">
+    <div class="tips-card">
+      <h3>Best Results</h3>
+      <ul>
+        <li>Use clear JPG/PNG/WEBP images</li>
+        <li>Capture the faulty area close-up</li>
+        <li>Add a short note in chat before analyzing</li>
+        <li>Avoid blurry or dark images</li>
+      </ul>
+    </div>
+    <app-machine-selector (machineSelected)="onMachineSelected($event)"></app-machine-selector>
+  </aside>
+
+  <div class="chat-wrap">
+    <app-chat [selectedMachineId]="selectedMachineId"></app-chat>
+  </div>
+</section>

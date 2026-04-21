@@ -43,6 +43,8 @@ export class ChatComponent implements OnDestroy {
   queryText = '';
   isSending = false;
   lastError?: string;
+  selectedImageDataUrl?: string;
+  selectedImageName?: string;
 
   // Speech-to-text (Web Speech API)
   readonly canUseSpeechToText: boolean;
@@ -261,6 +263,100 @@ export class ChatComponent implements OnDestroy {
         .replace(/^\s*[\*\u2022]\s+/gm, '- ')
         .trim()
     );
+  }
+
+  onImageSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      this.lastError = 'Please upload JPG, PNG, or WEBP image only (SVG is not supported).';
+      this.clearSelectedImage();
+      return;
+    }
+
+    const maxBytes = 5 * 1024 * 1024;
+    if (file.size > maxBytes) {
+      this.lastError = 'Image is too large. Please use a file smaller than 5MB.';
+      this.clearSelectedImage();
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result;
+      if (typeof result !== 'string') {
+        this.lastError = 'Failed to read selected image.';
+        return;
+      }
+      this.selectedImageDataUrl = result;
+      this.selectedImageName = file.name;
+      this.lastError = undefined;
+    };
+    reader.onerror = () => {
+      this.lastError = 'Failed to read selected image.';
+      this.clearSelectedImage();
+    };
+    reader.readAsDataURL(file);
+  }
+
+  clearSelectedImage() {
+    this.selectedImageDataUrl = undefined;
+    this.selectedImageName = undefined;
+  }
+
+  analyzeImage() {
+    if (!this.selectedImageDataUrl || this.isSending) return;
+
+    this.lastError = undefined;
+    this.isSending = true;
+    this.stopListening();
+
+    const note = this.queryText.trim();
+    const userMessage = this.selectedImageName
+      ? `Uploaded machine photo: ${this.selectedImageName}${note ? `\nNote: ${note}` : ''}`
+      : `Uploaded machine photo${note ? `\nNote: ${note}` : ''}`;
+
+    this.messages = [
+      ...this.messages,
+      { role: 'user', content: userMessage, timestamp: new Date() },
+    ];
+
+    this.chatService
+      .diagnoseImage({
+        imageDataUrl: this.selectedImageDataUrl,
+        machineId: this.selectedMachineId,
+        note: note || undefined,
+      })
+      .pipe(finalize(() => (this.isSending = false)))
+      .subscribe({
+        next: (res) => {
+          const assistantMsg: ChatMessage = {
+            role: 'assistant',
+            content: this.formatAssistantText(res.response),
+            timestamp: new Date(res.timestamp),
+          };
+          this.messages = [...this.messages, assistantMsg];
+          this.queryText = '';
+          this.clearSelectedImage();
+          if (this.autoSpeakReplies) this.speak(assistantMsg.content);
+        },
+        error: (err) => {
+          console.error('Image diagnosis failed:', err);
+          this.lastError = 'Could not analyze image right now. Check backend configuration and try again.';
+          this.messages = [
+            ...this.messages,
+            {
+              role: 'assistant',
+              content:
+                "I couldn't analyze that photo right now. Please try again, or verify the backend and vision-capable model settings.",
+              timestamp: new Date(),
+            },
+          ];
+        },
+      });
   }
 
   send() {

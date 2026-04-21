@@ -2,6 +2,7 @@
   {
     "name": "Conveyor Belt System A",
     "type": "Conveyor",
+    "imageUrl": "assets/machine-conveyor.jpg",
     "description": "Main production line conveyor belt system for material transport",
     "manufacturer": "Industrial Conveyors Inc.",
     "model": "IC-5000",
@@ -15,6 +16,7 @@
   {
     "name": "Industrial Motor Unit 1",
     "type": "Motor",
+    "imageUrl": "assets/machine-motor.jpg",
     "description": "High-power industrial motor for heavy machinery operations",
     "manufacturer": "Power Motors Ltd.",
     "model": "PM-3000",
@@ -28,6 +30,7 @@
   {
     "name": "CNC Milling Machine",
     "type": "CNC",
+    "imageUrl": "assets/machine-cnc.jpg",
     "description": "Computer numerical control milling machine for precision manufacturing",
     "manufacturer": "Precision CNC Systems",
     "model": "PCNC-2000",
@@ -41,6 +44,7 @@
   {
     "name": "Air Compressor Station",
     "type": "Air Compressor",
+    "imageUrl": "assets/machine-air-compressor.jpg",
     "description": "Industrial air compressor for pneumatic systems and tools",
     "manufacturer": "AirTech Industries",
     "model": "AT-1500",
@@ -52,6 +56,8 @@
     ]
   }
 ]
+
+
 
 
 

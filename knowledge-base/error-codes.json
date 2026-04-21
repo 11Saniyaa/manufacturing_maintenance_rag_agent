@@ -3,6 +3,7 @@
     "code": "E45",
     "meaning": "Overheating",
     "description": "Machine temperature exceeds safe operating limits. This can cause damage to components and pose safety risks.",
+    "imageUrl": "https://placehold.co/600x360?text=Overheating+Alert",
     "troubleshootingSteps": [
       "Check cooling fan operation - ensure it's running and not blocked",
       "Inspect ventilation system - clear any obstructions",
@@ -17,6 +18,7 @@
     "code": "E12",
     "meaning": "Motor Overload",
     "description": "Motor is drawing excessive current, indicating it's working beyond its rated capacity.",
+    "imageUrl": "https://placehold.co/600x360?text=Motor+Overload",
     "troubleshootingSteps": [
       "Check motor load - reduce if excessive",
       "Inspect for mechanical binding - check for obstructions",
@@ -31,6 +33,7 @@
     "code": "M101",
     "meaning": "Spindle Error",
     "description": "CNC spindle malfunction detected. The spindle may not be rotating correctly or has lost position.",
+    "imageUrl": "https://placehold.co/600x360?text=Spindle+Error",
     "troubleshootingSteps": [
       "Check spindle motor connections - ensure all connections are secure",
       "Inspect spindle bearings - replace if worn or damaged",
@@ -45,6 +48,7 @@
     "code": "C88",
     "meaning": "Low Air Pressure",
     "description": "Compressed air pressure below required threshold. System cannot maintain adequate pressure.",
+    "imageUrl": "https://placehold.co/600x360?text=Low+Air+Pressure",
     "troubleshootingSteps": [
       "Check air filter condition - replace if dirty",
       "Inspect for air leaks - check all connections",
@@ -59,6 +63,7 @@
     "code": "E23",
     "meaning": "Belt Slippage",
     "description": "Conveyor belt is slipping on drive pulley, causing reduced efficiency and potential damage.",
+    "imageUrl": "https://placehold.co/600x360?text=Belt+Slippage",
     "troubleshootingSteps": [
       "Check belt tension - adjust if too loose",
       "Inspect belt condition - replace if worn",
@@ -70,6 +75,8 @@
     "machineType": "Conveyor"
   }
 ]
+
+
 
 
 

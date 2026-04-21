@@ -1,20 +1,25 @@
-<div class="app-container">
-  <header>
-    <h1>{{ title }}</h1>
-    <p class="subtitle">AI-powered maintenance assistant for manufacturing equipment</p>
-  </header>
-  
-  <main>
-    <div class="content-grid">
-      <div class="left-panel">
-        <app-machine-selector (machineSelected)="onMachineSelected($event)"></app-machine-selector>
-        <app-error-code-search></app-error-code-search>
-      </div>
-      
-      <div class="right-panel">
-        <app-chat [selectedMachineId]="selectedMachineId"></app-chat>
-      </div>
+<div class="app-shell">
+  <header class="topbar">
+    <div class="brand">
+      <h1>{{ title }}</h1>
+      <p>AI-powered maintenance assistant for manufacturing equipment</p>
     </div>
+
+    <nav class="nav-links">
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Home</a>
+      <a routerLink="/assistant" routerLinkActive="active">Voice Assistant</a>
+      <a routerLink="/photo-diagnosis" routerLinkActive="active">Photo Diagnosis</a>
+      <a routerLink="/error-codes" routerLinkActive="active">Error Codes</a>
+      <a routerLink="/machines" routerLinkActive="active">Machines</a>
+    </nav>
+  </header>
+
+  <main class="page-content">
+    <router-outlet></router-outlet>
   </main>
+
+  <footer class="footer">
+    <span>© {{ currentYear }} Maintenance Query Agent</span>
+  </footer>
 </div>
 

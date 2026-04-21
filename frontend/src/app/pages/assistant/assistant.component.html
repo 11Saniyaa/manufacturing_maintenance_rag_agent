@@ -1,0 +1,14 @@
+<section class="page-header">
+  <h2>Voice + Text Assistant</h2>
+  <p>Use microphone and bilingual responses (Hindi/English) for conversational troubleshooting.</p>
+</section>
+
+<section class="assistant-layout">
+  <aside class="left-panel">
+    <app-machine-selector (machineSelected)="onMachineSelected($event)"></app-machine-selector>
+  </aside>
+
+  <div class="chat-panel">
+    <app-chat [selectedMachineId]="selectedMachineId"></app-chat>
+  </div>
+</section>

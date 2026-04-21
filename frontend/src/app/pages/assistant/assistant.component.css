@@ -1,0 +1,34 @@
+.page-header {
+  margin-bottom: 14px;
+}
+
+.page-header h2 {
+  font-size: 1.6rem;
+  color: #1c2f4d;
+}
+
+.page-header p {
+  color: #5a6b86;
+  margin-top: 6px;
+}
+
+.assistant-layout {
+  display: grid;
+  grid-template-columns: 330px 1fr;
+  gap: 16px;
+}
+
+.left-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-panel {
+  min-height: 640px;
+}
+
+@media (max-width: 1000px) {
+  .assistant-layout {
+    grid-template-columns: 1fr;
+  }
+}

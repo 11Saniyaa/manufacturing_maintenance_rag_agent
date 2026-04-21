@@ -1,0 +1,49 @@
+.page-header {
+  margin-bottom: 14px;
+}
+
+.page-header h2 {
+  font-size: 1.6rem;
+  color: #1c2f4d;
+}
+
+.page-header p {
+  color: #5a6b86;
+  margin-top: 6px;
+}
+
+.machine-layout {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  gap: 16px;
+}
+
+.info-card {
+  background: #fff;
+  border: 1px solid #e3e8f0;
+  border-radius: 12px;
+  padding: 18px;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.05);
+}
+
+.info-card h3 {
+  color: #1f3557;
+  margin-bottom: 10px;
+}
+
+.info-card p {
+  color: #4f5f7a;
+  margin-bottom: 16px;
+}
+
+.open-assistant {
+  text-decoration: none;
+  font-weight: 600;
+  color: #0b5ed7;
+}
+
+@media (max-width: 1000px) {
+  .machine-layout {
+    grid-template-columns: 1fr;
+  }
+}

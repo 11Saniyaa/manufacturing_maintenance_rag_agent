@@ -24,6 +24,13 @@
 
   <div *ngIf="!isLoading && errorCodes.length > 0" class="results">
     <div *ngFor="let code of errorCodes" class="error-code-card">
+      <img
+        *ngIf="code.imageUrl"
+        [src]="code.imageUrl"
+        [alt]="code.code + ' issue image'"
+        class="code-image"
+        loading="lazy"
+      />
       <div class="code-header">
         <span class="code-value">{{ code.code }}</span>
         <span class="code-meaning">{{ code.meaning }}</span>
@@ -36,6 +43,8 @@
     </div>
   </div>
 </div>
+
+
 
 
 

@@ -7,9 +7,5 @@ import { Component } from '@angular/core';
 })
 export class AppComponent {
   title = 'Maintenance Query Agent';
-  selectedMachineId?: number;
-
-  onMachineSelected(machineId: number | undefined) {
-    this.selectedMachineId = machineId;
-  }
+  currentYear = new Date().getFullYear();
 }

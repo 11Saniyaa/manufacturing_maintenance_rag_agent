@@ -23,7 +23,19 @@
     </button>
   </div>
   <div *ngIf="isLoading" class="loading">Loading machines...</div>
+
+  <div *ngIf="!isLoading && selectedMachine?.imageUrl" class="selected-machine-preview">
+    <img
+      [src]="selectedMachine?.imageUrl"
+      [alt]="selectedMachine?.name + ' image'"
+      class="selected-machine-image"
+      loading="lazy"
+    />
+    <div class="selected-machine-name">{{ selectedMachine?.name }}</div>
+  </div>
 </div>
+
+
 
 
 

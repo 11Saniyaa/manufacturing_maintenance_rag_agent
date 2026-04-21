@@ -1,0 +1,53 @@
+.page-header {
+  margin-bottom: 14px;
+}
+
+.page-header h2 {
+  font-size: 1.6rem;
+  color: #1c2f4d;
+}
+
+.page-header p {
+  color: #5a6b86;
+  margin-top: 6px;
+}
+
+.diagnosis-layout {
+  display: grid;
+  grid-template-columns: 330px 1fr;
+  gap: 16px;
+}
+
+.side {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tips-card {
+  background: #fff;
+  border: 1px solid #dbe5f2;
+  border-radius: 12px;
+  padding: 14px;
+}
+
+.tips-card h3 {
+  color: #1f3557;
+  margin-bottom: 8px;
+}
+
+.tips-card ul {
+  margin-left: 18px;
+  color: #4f5f7a;
+  line-height: 1.45;
+}
+
+.chat-wrap {
+  min-height: 640px;
+}
+
+@media (max-width: 1000px) {
+  .diagnosis-layout {
+    grid-template-columns: 1fr;
+  }
+}

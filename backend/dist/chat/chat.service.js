@@ -64,7 +64,6 @@ let ChatService = class ChatService {
             const llmBaseUrl = process.env.LLM_BASE_URL || this.getDefaultBaseUrl(llmProvider);
             const llmModel = process.env.LLM_MODEL || this.getDefaultModel(llmProvider);
             const llmApiKey = process.env.LLM_API_KEY || 'not-needed';
-            const { HumanMessage, SystemMessage } = await Promise.resolve().then(() => __importStar(require('@langchain/core/messages')));
             const { ChatOpenAI } = await Promise.resolve().then(() => __importStar(require('@langchain/openai')));
             const model = new ChatOpenAI({
                 modelName: llmModel,
@@ -75,8 +74,8 @@ let ChatService = class ChatService {
                 temperature: 0.7,
             });
             const messages = [
-                new SystemMessage(systemPrompt),
-                new HumanMessage(query),
+                { role: 'system', content: systemPrompt },
+                { role: 'user', content: query },
             ];
             const response = await model.invoke(messages);
             const responseText = response.content;
@@ -93,6 +92,70 @@ let ChatService = class ChatService {
                 console.error('⚠️  Authentication error: Check your LLM_API_KEY in .env file');
             }
             return this.getFallbackResponse(query, machineId);
+        }
+    }
+    async diagnoseImage(imageDataUrl, machineId, note) {
+        try {
+            if (!imageDataUrl || typeof imageDataUrl !== 'string' || !imageDataUrl.startsWith('data:image/')) {
+                return 'Please upload a valid image file to analyze.';
+            }
+            const context = await this.buildContext(note || 'image diagnosis', machineId);
+            const systemPrompt = this.buildSystemPrompt(context) +
+                '\n\nYou are now doing visual machine fault triage from a user-submitted photo.' +
+                '\nFocus on: visible damage, leaks, corrosion, loose parts, overheating indicators, alignment issues, and safety hazards.' +
+                '\nIf the image is unclear, say what is uncertain and ask for a clearer angle.' +
+                '\nReturn concise output with this exact structure:' +
+                '\n1) What I can see' +
+                '\n2) Likely issue(s)' +
+                '\n3) Immediate safe checks' +
+                '\n4) Recommended next actions' +
+                '\n5) Confidence (Low/Medium/High)';
+            const llmProvider = process.env.LLM_PROVIDER || 'lmstudio';
+            const llmBaseUrl = process.env.LLM_BASE_URL || this.getDefaultBaseUrl(llmProvider);
+            const llmModel = process.env.LLM_VISION_MODEL || process.env.LLM_MODEL || this.getDefaultModel(llmProvider);
+            const llmApiKey = process.env.LLM_API_KEY || 'not-needed';
+            const { ChatOpenAI } = await Promise.resolve().then(() => __importStar(require('@langchain/openai')));
+            const model = new ChatOpenAI({
+                modelName: llmModel,
+                openAIApiKey: llmApiKey,
+                configuration: {
+                    baseURL: llmBaseUrl,
+                },
+                temperature: 0.3,
+            });
+            const userText = note?.trim()
+                ? `User note: ${note.trim()}\nAnalyze this machine photo and explain what might be wrong.`
+                : 'Analyze this machine photo and explain what might be wrong.';
+            const messages = [
+                { role: 'system', content: systemPrompt },
+                {
+                    role: 'user',
+                    content: [
+                        { type: 'text', text: userText },
+                        { type: 'image_url', image_url: { url: imageDataUrl } },
+                    ],
+                },
+            ];
+            const response = await model.invoke(messages);
+            const responseText = Array.isArray(response.content)
+                ? response.content.map((part) => typeof part === 'string' ? part : (part?.text || '')).join('\n').trim()
+                : response.content;
+            await this.queryLogService.create({
+                query: note?.trim() ? `[IMAGE] ${note.trim()}` : '[IMAGE] Diagnose machine photo',
+                response: responseText,
+                machineId: machineId || null,
+            });
+            return responseText;
+        }
+        catch (error) {
+            console.error('Error diagnosing image:', error);
+            if (error?.message?.toLowerCase?.().includes('invalid image data')) {
+                return 'Uploaded image format is not supported by the vision model. Please upload JPG, PNG, or WEBP.';
+            }
+            if (error?.message?.includes('model') || error?.message?.includes('vision') || error?.message?.includes('image')) {
+                return "Image analysis is not available with the current model. Set a vision-capable model in backend/.env as LLM_VISION_MODEL and try again.";
+            }
+            return 'Could not analyze this image right now. Please try again in a moment.';
         }
     }
     getDefaultBaseUrl(provider) {

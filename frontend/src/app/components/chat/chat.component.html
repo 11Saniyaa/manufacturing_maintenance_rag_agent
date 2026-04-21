@@ -40,6 +40,32 @@
       [disabled]="isSending"
     ></textarea>
     <div class="actions">
+      <label class="upload">
+        <input type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" (change)="onImageSelected($event)" [disabled]="isSending" />
+        <span>Photo</span>
+      </label>
+
+      <button
+        *ngIf="selectedImageDataUrl"
+        class="icon stop"
+        type="button"
+        title="Remove selected image"
+        (click)="clearSelectedImage()"
+        [disabled]="isSending"
+      >
+        Clear Photo
+      </button>
+
+      <button
+        class="send photo-send"
+        type="button"
+        (click)="analyzeImage()"
+        [disabled]="isSending || !selectedImageDataUrl"
+        title="Analyze selected machine photo"
+      >
+        {{ isSending ? 'Analyzing…' : 'Analyze Photo' }}
+      </button>
+
       <button
         class="icon"
         type="button"
@@ -95,6 +121,11 @@
         {{ isSending ? 'Sending…' : 'Send' }}
       </button>
     </div>
+  </div>
+
+  <div *ngIf="selectedImageDataUrl" class="image-preview-wrap">
+    <img [src]="selectedImageDataUrl" alt="Selected machine photo preview" class="image-preview" />
+    <div class="image-preview-label">{{ selectedImageName || 'Photo selected' }}</div>
   </div>
 
   <div *ngIf="sttStatus" class="stt-status">{{ sttStatus }}</div>

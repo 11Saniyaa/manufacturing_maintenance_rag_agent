@@ -41,7 +41,13 @@ export class MachineSelectorComponent implements OnInit {
     this.selectedMachineId = undefined;
     this.machineSelected.emit(undefined);
   }
+
+  get selectedMachine(): Machine | undefined {
+    return this.machines.find((machine) => machine.id === this.selectedMachineId);
+  }
 }
+
+
 
 
 

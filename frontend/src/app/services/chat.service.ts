@@ -7,6 +7,12 @@ export interface ChatQueryRequest {
   machineId?: number;
 }
 
+export interface ImageDiagnosisRequest {
+  imageDataUrl: string;
+  machineId?: number;
+  note?: string;
+}
+
 export interface ChatQueryResponse {
   response: string;
   timestamp: string;
@@ -22,5 +28,9 @@ export class ChatService {
 
   query(request: ChatQueryRequest): Observable<ChatQueryResponse> {
     return this.http.post<ChatQueryResponse>(`${this.apiUrl}/chat/query`, request);
+  }
+
+  diagnoseImage(request: ImageDiagnosisRequest): Observable<ChatQueryResponse> {
+    return this.http.post<ChatQueryResponse>(`${this.apiUrl}/chat/diagnose-image`, request);
   }
 }

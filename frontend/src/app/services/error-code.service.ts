@@ -9,6 +9,7 @@ export interface ErrorCode {
   description: string;
   troubleshootingSteps: string;
   machineId?: number;
+  imageUrl?: string;
 }
 
 @Injectable({
@@ -28,6 +29,8 @@ export class ErrorCodeService {
     return this.http.get<ErrorCode[]>(`${this.apiUrl}/error-codes`);
   }
 }
+
+
 
 
 

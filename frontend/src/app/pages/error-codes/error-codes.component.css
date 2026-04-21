@@ -1,0 +1,13 @@
+.page-header {
+  margin-bottom: 14px;
+}
+
+.page-header h2 {
+  font-size: 1.6rem;
+  color: #1c2f4d;
+}
+
+.page-header p {
+  color: #5a6b86;
+  margin-top: 6px;
+}
