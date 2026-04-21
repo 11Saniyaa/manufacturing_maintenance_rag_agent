@@ -46,6 +46,8 @@ export class ChatComponent implements OnDestroy {
   lastError?: string;
   selectedImageDataUrl?: string;
   selectedImageName?: string;
+  selectedImageDetails?: string;
+  isProcessingImage = false;
 
   // Speech-to-text (Web Speech API)
   readonly canUseSpeechToText: boolean;
@@ -266,7 +268,7 @@ export class ChatComponent implements OnDestroy {
     );
   }
 
-  onImageSelected(event: Event) {
+  async onImageSelected(event: Event) {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
     if (!file) return;
@@ -278,38 +280,38 @@ export class ChatComponent implements OnDestroy {
       return;
     }
 
-    const maxBytes = 5 * 1024 * 1024;
+    const maxBytes = 10 * 1024 * 1024;
     if (file.size > maxBytes) {
-      this.lastError = 'Image is too large. Please use a file smaller than 5MB.';
+      this.lastError = 'Image is too large. Please use a file smaller than 10MB.';
       this.clearSelectedImage();
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      const result = reader.result;
-      if (typeof result !== 'string') {
-        this.lastError = 'Failed to read selected image.';
-        return;
-      }
-      this.selectedImageDataUrl = result;
+    this.isProcessingImage = true;
+    try {
+      const optimized = await this.optimizeImageForDiagnosis(file);
+      this.selectedImageDataUrl = optimized.dataUrl;
       this.selectedImageName = file.name;
+      this.selectedImageDetails = `${optimized.width}x${optimized.height} · ${Math.round(optimized.sizeBytes / 1024)} KB`;
       this.lastError = undefined;
-    };
-    reader.onerror = () => {
-      this.lastError = 'Failed to read selected image.';
+    } catch (error) {
+      console.error('Image processing failed:', error);
+      this.lastError = 'Failed to process selected image. Try another image.';
       this.clearSelectedImage();
-    };
-    reader.readAsDataURL(file);
+    } finally {
+      this.isProcessingImage = false;
+      input.value = '';
+    }
   }
 
   clearSelectedImage() {
     this.selectedImageDataUrl = undefined;
     this.selectedImageName = undefined;
+    this.selectedImageDetails = undefined;
   }
 
   analyzeImage() {
-    if (!this.selectedImageDataUrl || this.isSending) return;
+    if (!this.selectedImageDataUrl || this.isSending || this.isProcessingImage) return;
 
     this.lastError = undefined;
     this.isSending = true;
@@ -429,5 +431,85 @@ export class ChatComponent implements OnDestroy {
 
   get showPhotoControls(): boolean {
     return this.uiMode !== 'voice';
+  }
+
+  private async optimizeImageForDiagnosis(file: File): Promise<{ dataUrl: string; sizeBytes: number; width: number; height: number }> {
+    const originalDataUrl = await this.readFileAsDataUrl(file);
+    const image = await this.loadImage(originalDataUrl);
+
+    let targetWidth = image.naturalWidth;
+    let targetHeight = image.naturalHeight;
+    const maxDimension = 1400;
+    const maxSide = Math.max(targetWidth, targetHeight);
+    if (maxSide > maxDimension) {
+      const scale = maxDimension / maxSide;
+      targetWidth = Math.max(1, Math.round(targetWidth * scale));
+      targetHeight = Math.max(1, Math.round(targetHeight * scale));
+    }
+
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      throw new Error('Canvas not available');
+    }
+
+    const outputMime = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
+    let quality = outputMime === 'image/jpeg' ? 0.86 : undefined;
+    let currentWidth = targetWidth;
+    let currentHeight = targetHeight;
+    let resultDataUrl = originalDataUrl;
+
+    for (let i = 0; i < 6; i++) {
+      canvas.width = currentWidth;
+      canvas.height = currentHeight;
+      ctx.clearRect(0, 0, currentWidth, currentHeight);
+      ctx.drawImage(image, 0, 0, currentWidth, currentHeight);
+      resultDataUrl = canvas.toDataURL(outputMime, quality);
+
+      const sizeBytes = this.getDataUrlSizeBytes(resultDataUrl);
+      if (sizeBytes <= 3_500_000) {
+        return { dataUrl: resultDataUrl, sizeBytes, width: currentWidth, height: currentHeight };
+      }
+
+      currentWidth = Math.max(640, Math.round(currentWidth * 0.85));
+      currentHeight = Math.max(640, Math.round(currentHeight * 0.85));
+      if (quality !== undefined) {
+        quality = Math.max(0.55, quality - 0.08);
+      }
+    }
+
+    const finalSize = this.getDataUrlSizeBytes(resultDataUrl);
+    if (finalSize > 3_900_000) {
+      throw new Error('Optimized image still too large');
+    }
+    return { dataUrl: resultDataUrl, sizeBytes: finalSize, width: currentWidth, height: currentHeight };
+  }
+
+  private readFileAsDataUrl(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const result = reader.result;
+        if (typeof result === 'string') resolve(result);
+        else reject(new Error('Invalid file read result'));
+      };
+      reader.onerror = () => reject(reader.error || new Error('File read failed'));
+      reader.readAsDataURL(file);
+    });
+  }
+
+  private loadImage(dataUrl: string): Promise<HTMLImageElement> {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = () => reject(new Error('Image decode failed'));
+      img.src = dataUrl;
+    });
+  }
+
+  private getDataUrlSizeBytes(dataUrl: string): number {
+    const base64 = dataUrl.split(',')[1] || '';
+    const padding = base64.endsWith('==') ? 2 : base64.endsWith('=') ? 1 : 0;
+    return Math.floor((base64.length * 3) / 4) - padding;
   }
 }

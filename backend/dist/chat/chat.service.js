@@ -99,17 +99,23 @@ let ChatService = class ChatService {
             if (!imageDataUrl || typeof imageDataUrl !== 'string' || !imageDataUrl.startsWith('data:image/')) {
                 return 'Please upload a valid image file to analyze.';
             }
+            const payloadBytes = this.estimateDataUrlBytes(imageDataUrl);
+            if (payloadBytes > 4_000_000) {
+                return 'Image is too large for analysis payload. Please upload a clearer but smaller JPG/PNG/WEBP image.';
+            }
             const context = await this.buildContext(note || 'image diagnosis', machineId);
             const systemPrompt = this.buildSystemPrompt(context) +
                 '\n\nYou are now doing visual machine fault triage from a user-submitted photo.' +
-                '\nFocus on: visible damage, leaks, corrosion, loose parts, overheating indicators, alignment issues, and safety hazards.' +
-                '\nIf the image is unclear, say what is uncertain and ask for a clearer angle.' +
+                '\nFocus on: visible damage, leaks, corrosion, loose parts, overheating indicators, belt/chain condition, alignment issues, vibration clues, and safety hazards.' +
+                '\nDo not guess hidden/internal faults from visual data alone; clearly mark uncertainty.' +
+                '\nIf image quality is low, explicitly request one or two better angles before concluding.' +
                 '\nReturn concise output with this exact structure:' +
                 '\n1) What I can see' +
                 '\n2) Likely issue(s)' +
                 '\n3) Immediate safe checks' +
                 '\n4) Recommended next actions' +
-                '\n5) Confidence (Low/Medium/High)';
+                '\n5) Confidence (Low/Medium/High)' +
+                '\n6) Extra photo needed? (Yes/No + what to capture)';
             const llmProvider = process.env.LLM_PROVIDER || 'lmstudio';
             const llmBaseUrl = process.env.LLM_BASE_URL || this.getDefaultBaseUrl(llmProvider);
             const llmModel = process.env.LLM_VISION_MODEL || process.env.LLM_MODEL || this.getDefaultModel(llmProvider);
@@ -157,6 +163,14 @@ let ChatService = class ChatService {
             }
             return 'Could not analyze this image right now. Please try again in a moment.';
         }
+    }
+    estimateDataUrlBytes(dataUrl) {
+        const commaIndex = dataUrl.indexOf(',');
+        if (commaIndex === -1)
+            return 0;
+        const base64 = dataUrl.slice(commaIndex + 1);
+        const padding = base64.endsWith('==') ? 2 : base64.endsWith('=') ? 1 : 0;
+        return Math.floor((base64.length * 3) / 4) - padding;
     }
     getDefaultBaseUrl(provider) {
         switch (provider.toLowerCase()) {

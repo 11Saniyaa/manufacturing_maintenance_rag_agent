@@ -61,10 +61,10 @@
         class="send photo-send"
         type="button"
         (click)="analyzeImage()"
-        [disabled]="isSending || !selectedImageDataUrl"
+        [disabled]="isSending || isProcessingImage || !selectedImageDataUrl"
         title="Analyze selected machine photo"
       >
-        {{ isSending ? 'Analyzing…' : 'Analyze Photo' }}
+        {{ isSending || isProcessingImage ? 'Analyzing…' : 'Analyze Photo' }}
       </button>
 
       <button
@@ -128,7 +128,10 @@
 
   <div *ngIf="selectedImageDataUrl" class="image-preview-wrap">
     <img [src]="selectedImageDataUrl" alt="Selected machine photo preview" class="image-preview" />
-    <div class="image-preview-label">{{ selectedImageName || 'Photo selected' }}</div>
+    <div class="image-preview-label">
+      {{ selectedImageName || 'Photo selected' }}
+      <span *ngIf="selectedImageDetails"> · {{ selectedImageDetails }}</span>
+    </div>
   </div>
 
   <div *ngIf="sttStatus" class="stt-status">{{ sttStatus }}</div>
