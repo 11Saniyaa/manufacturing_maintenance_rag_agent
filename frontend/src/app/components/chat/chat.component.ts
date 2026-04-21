@@ -27,6 +27,7 @@ type SpeechRecognitionLike = SpeechRecognition & {
 })
 export class ChatComponent implements OnDestroy {
   @Input() selectedMachineId?: number;
+  @Input() uiMode: 'voice' | 'photo' | 'full' = 'full';
 
   language: ChatLanguage = 'en-US';
   conciseMode = true;
@@ -420,5 +421,13 @@ export class ChatComponent implements OnDestroy {
 
   trackByIndex(index: number) {
     return index;
+  }
+
+  get showVoiceControls(): boolean {
+    return this.uiMode !== 'photo';
+  }
+
+  get showPhotoControls(): boolean {
+    return this.uiMode !== 'voice';
   }
 }

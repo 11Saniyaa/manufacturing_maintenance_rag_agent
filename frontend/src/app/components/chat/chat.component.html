@@ -40,13 +40,13 @@
       [disabled]="isSending"
     ></textarea>
     <div class="actions">
-      <label class="upload">
+      <label *ngIf="showPhotoControls" class="upload">
         <input type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" (change)="onImageSelected($event)" [disabled]="isSending" />
         <span>Photo</span>
       </label>
 
       <button
-        *ngIf="selectedImageDataUrl"
+        *ngIf="showPhotoControls && selectedImageDataUrl"
         class="icon stop"
         type="button"
         title="Remove selected image"
@@ -57,6 +57,7 @@
       </button>
 
       <button
+        *ngIf="showPhotoControls"
         class="send photo-send"
         type="button"
         (click)="analyzeImage()"
@@ -67,6 +68,7 @@
       </button>
 
       <button
+        *ngIf="showVoiceControls"
         class="icon"
         type="button"
         title="Speak your question"
@@ -78,7 +80,7 @@
       </button>
 
       <button
-        *ngIf="isListening"
+        *ngIf="showVoiceControls && isListening"
         class="icon stop"
         type="button"
         title="Stop microphone"
@@ -88,6 +90,7 @@
       </button>
 
       <button
+        *ngIf="showVoiceControls"
         class="icon"
         type="button"
         title="Read the last answer aloud"
@@ -98,7 +101,7 @@
       </button>
 
       <button
-        *ngIf="isSpeaking"
+        *ngIf="showVoiceControls && isSpeaking"
         class="icon stop"
         type="button"
         title="Stop voice"
@@ -107,7 +110,7 @@
         Stop
       </button>
 
-      <label class="toggle" [class.disabled]="!canUseTextToSpeech" title="Automatically read assistant replies aloud">
+      <label *ngIf="showVoiceControls" class="toggle" [class.disabled]="!canUseTextToSpeech" title="Automatically read assistant replies aloud">
         <input type="checkbox" [(ngModel)]="autoSpeakReplies" [disabled]="!canUseTextToSpeech" />
         <span>Auto</span>
       </label>

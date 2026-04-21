@@ -5,10 +5,18 @@
 
 <section class="assistant-layout">
   <aside class="left-panel">
+    <div class="voice-card">
+      <h3>Voice Workflow</h3>
+      <ol>
+        <li>Select language (Hindi/English)</li>
+        <li>Tap mic and describe symptoms</li>
+        <li>Review spoken response and next steps</li>
+      </ol>
+    </div>
     <app-machine-selector (machineSelected)="onMachineSelected($event)"></app-machine-selector>
   </aside>
 
-  <div class="chat-panel">
-    <app-chat [selectedMachineId]="selectedMachineId"></app-chat>
+  <div class="chat-panel voice-theme">
+    <app-chat [selectedMachineId]="selectedMachineId" [uiMode]="'voice'"></app-chat>
   </div>
 </section>

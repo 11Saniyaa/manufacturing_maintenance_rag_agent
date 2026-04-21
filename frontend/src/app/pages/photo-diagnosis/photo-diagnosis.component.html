@@ -17,7 +17,7 @@
     <app-machine-selector (machineSelected)="onMachineSelected($event)"></app-machine-selector>
   </aside>
 
-  <div class="chat-wrap">
-    <app-chat [selectedMachineId]="selectedMachineId"></app-chat>
+  <div class="chat-wrap photo-theme">
+    <app-chat [selectedMachineId]="selectedMachineId" [uiMode]="'photo'"></app-chat>
   </div>
 </section>
